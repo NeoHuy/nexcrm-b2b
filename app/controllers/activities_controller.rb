@@ -5,6 +5,8 @@ class ActivitiesController < ApplicationController
     @activity.user = current_user
     @activity.occurred_at ||= Time.current
 
+    authorize @activity
+
     if @activity.save
       flash[:notice] = "Đã lưu nhật ký tương tác: #{@activity.title}"
     else
@@ -17,6 +19,9 @@ class ActivitiesController < ApplicationController
   def destroy
     @customer = Customer.find(params[:customer_id])
     @activity = @customer.activities.find(params[:id])
+
+    authorize @activity
+
     @activity.destroy
     flash[:notice] = "Đã xóa nhật ký tương tác."
     redirect_to customer_path(@customer)

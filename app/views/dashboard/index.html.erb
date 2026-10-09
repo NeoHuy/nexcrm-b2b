@@ -9,7 +9,9 @@
     </div>
     <h1 class="text-2xl font-bold tracking-tight">Xin chào, <%= current_user.name %> 👋</h1>
     <p class="text-sm text-slate-300 mt-1">
-      <% if current_user.sales? %>
+      <% if current_user.admin? %>
+        Bảng điều khiển Quản trị viên: Toàn quyền kiểm soát danh mục khách hàng, phê duyệt công nợ và giám sát toàn diện.
+      <% elsif current_user.sales? %>
         Theo dõi tiến độ hợp đồng, khách hàng mục tiêu và chỉ số kinh doanh B2B của bạn.
       <% elsif current_user.cs? %>
         Cảnh báo công nợ quá hạn, sức khỏe tài khoản và theo dõi hỗ trợ khách hàng B2B.
@@ -98,7 +100,37 @@
 </div>
 
 <!-- Role Tailored Action & Insights Panel -->
-<% if current_user.sales? %>
+<% if current_user.admin? %>
+  <!-- ADMIN EXECUTIVE VIEW -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+        </div>
+        <h2 class="text-base font-bold text-slate-900">Bảng điều phối Quản trị viên (Toàn quyền hệ thống)</h2>
+      </div>
+      <span class="text-xs bg-rose-50 text-rose-700 font-bold px-2.5 py-1 rounded-full border border-rose-200">
+        Phân quyền Policy: Toàn quyền xem, sửa, xóa, duyệt nợ
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <span class="text-xs text-slate-500 font-medium">Nhân sự toàn hệ thống:</span>
+        <p class="text-xl font-bold text-slate-900 mt-1"><%= User.count %> tài khoản</p>
+      </div>
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <span class="text-xs text-slate-500 font-medium">Nợ quá hạn cần CS đôn đốc:</span>
+        <p class="text-xl font-bold text-rose-600 mt-1"><%= @overdue_customers.count %> doanh nghiệp</p>
+      </div>
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <span class="text-xs text-slate-500 font-medium">Khách hàng cảnh báo nguy cơ:</span>
+        <p class="text-xl font-bold text-amber-600 mt-1"><%= @at_risk_customers.count %> doanh nghiệp</p>
+      </div>
+    </div>
+  </div>
+<% elsif current_user.sales? %>
   <!-- SALES VIEW -->
   <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
     <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">

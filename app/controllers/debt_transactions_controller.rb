@@ -5,6 +5,8 @@ class DebtTransactionsController < ApplicationController
     @transaction.user = current_user
     @transaction.transaction_date ||= Date.current
 
+    authorize @transaction
+
     if @transaction.save
       flash[:notice] = "Đã cập nhật công nợ thành công! (#{DebtTransaction::TRANSACTION_TYPES[@transaction.transaction_type]}: #{format_vnd(@transaction.amount)})"
     else

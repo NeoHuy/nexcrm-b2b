@@ -88,6 +88,7 @@
               <!-- Quick Role Switch dropdown / buttons -->
               <div class="hidden sm:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
                 <span class="px-2 text-slate-400">Đổi vai trò:</span>
+                <%= button_to "Admin", demo_login_path(role: "admin"), method: :post, class: "px-2.5 py-1 rounded-lg transition #{current_user.admin? ? 'bg-white text-rose-700 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'}" %>
                 <%= button_to "Sales", demo_login_path(role: "sales"), method: :post, class: "px-2.5 py-1 rounded-lg transition #{current_user.sales? ? 'bg-white text-blue-700 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'}" %>
                 <%= button_to "CS", demo_login_path(role: "cs"), method: :post, class: "px-2.5 py-1 rounded-lg transition #{current_user.cs? ? 'bg-white text-emerald-700 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'}" %>
                 <%= button_to "Marketing", demo_login_path(role: "marketing"), method: :post, class: "px-2.5 py-1 rounded-lg transition #{current_user.marketing? ? 'bg-white text-purple-700 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'}" %>

@@ -1,7 +1,8 @@
 class User < ApplicationRecord
   has_secure_password
 
-  ROLES = %w[sales cs marketing].freeze
+  ROLES = %w[admin user].freeze
+  DEPARTMENTS = %w[sales cs marketing management].freeze
 
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
@@ -11,33 +12,51 @@ class User < ApplicationRecord
   has_many :activities, dependent: :destroy
   has_many :debt_transactions, dependent: :nullify
 
+  def admin?
+    role == "admin"
+  end
+
+  def user?
+    role == "user"
+  end
+
   def sales?
-    role == "sales"
+    department == "sales"
   end
 
   def cs?
-    role == "cs"
+    department == "cs"
   end
 
   def marketing?
-    role == "marketing"
+    department == "marketing"
   end
 
   def role_label
-    case role
-    when "sales" then "Kinh doanh (Sales)"
-    when "cs" then "Chăm sóc KH (CS)"
-    when "marketing" then "Tiếp thị (Marketing)"
-    else role.to_s.titleize
+    if admin?
+      "Quản trị viên (Admin)"
+    elsif sales?
+      "Kinh doanh (Sales)"
+    elsif cs?
+      "Chăm sóc KH (CS)"
+    elsif marketing?
+      "Tiếp thị (Marketing)"
+    else
+      "Nhân viên (User)"
     end
   end
 
   def role_badge_class
-    case role
-    when "sales" then "bg-blue-100 text-blue-800 border-blue-200"
-    when "cs" then "bg-emerald-100 text-emerald-800 border-emerald-200"
-    when "marketing" then "bg-purple-100 text-purple-800 border-purple-200"
-    else "bg-slate-100 text-slate-800 border-slate-200"
+    if admin?
+      "bg-rose-100 text-rose-800 border-rose-200 font-bold"
+    elsif sales?
+      "bg-blue-100 text-blue-800 border-blue-200"
+    elsif cs?
+      "bg-emerald-100 text-emerald-800 border-emerald-200"
+    elsif marketing?
+      "bg-purple-100 text-purple-800 border-purple-200"
+    else
+      "bg-slate-100 text-slate-800 border-slate-200"
     end
   end
 end

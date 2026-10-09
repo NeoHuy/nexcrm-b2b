@@ -10,8 +10,14 @@ class DashboardController < ApplicationController
     @recent_activities = Activity.includes(:customer, :user).order(created_at: :desc).limit(8)
     @recent_customers = Customer.includes(:assigned_user).order(created_at: :desc).limit(6)
 
-    # Role-specific data
-    if current_user.sales?
+    # Role & Policy-specific data
+    if current_user.admin?
+      @cs_urgent_debts = Customer.overdue_debts.order(payment_due_date: :asc).limit(5)
+      @cs_at_risk = Customer.where(status: "at_risk").limit(5)
+      @industry_breakdown = Customer.group(:industry).count
+      @source_breakdown = Customer.group(:lead_source).count
+      @status_breakdown = Customer.group(:status).count
+    elsif current_user.sales?
       @my_customers = current_user.assigned_customers
       @my_pipeline_count = @my_customers.where(status: %w[lead prospect]).count
       @my_active_count = @my_customers.where(status: "active").count

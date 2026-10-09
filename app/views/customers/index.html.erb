@@ -12,10 +12,12 @@
     </div>
 
     <div class="flex items-center space-x-3">
-      <a href="<%= new_customer_path %>" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-100 flex items-center space-x-2 transition">
-        <i data-lucide="plus" class="w-4 h-4"></i>
-        <span>Thêm khách hàng B2B mới</span>
-      </a>
+      <% if policy(Customer).new? %>
+        <a href="<%= new_customer_path %>" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-100 flex items-center space-x-2 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Thêm khách hàng B2B mới</span>
+        </a>
+      <% end %>
     </div>
   </div>
 
@@ -199,9 +201,11 @@
                     <a href="<%= customer_path(c) %>" class="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-semibold rounded-lg transition" title="Xem chi tiết">
                       Chi tiết
                     </a>
-                    <a href="<%= edit_customer_path(c) %>" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition" title="Chỉnh sửa">
-                      <i data-lucide="edit-3" class="w-4 h-4"></i>
-                    </a>
+                    <% if policy(c).edit? %>
+                      <a href="<%= edit_customer_path(c) %>" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition" title="Chỉnh sửa">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                      </a>
+                    <% end %>
                   </div>
                 </td>
               </tr>

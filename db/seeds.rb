@@ -7,14 +7,25 @@ Customer.destroy_all
 User.destroy_all
 
 # 2. Seed Users with BCrypt passwords
+admin_user = User.create!(
+  name: "Quản trị viên Hệ thống",
+  email: "admin@crm.saas",
+  password: "password123",
+  role: "admin",
+  title: "Giám đốc Vận hành & Quản trị (Admin)",
+  phone: "0901 000 999",
+  department: "management",
+  avatar_color: "rose"
+)
+
 sales_user = User.create!(
   name: "Nguyễn Văn Hùng",
   email: "sales@crm.saas",
   password: "password123",
-  role: "sales",
+  role: "user",
   title: "Trưởng nhóm Kinh doanh B2B (Senior AE)",
   phone: "0908 112 233",
-  department: "Phòng Kinh doanh",
+  department: "sales",
   avatar_color: "blue"
 )
 
@@ -22,10 +33,10 @@ cs_user = User.create!(
   name: "Trần Thị Mai",
   email: "cs@crm.saas",
   password: "password123",
-  role: "cs",
+  role: "user",
   title: "Trưởng phòng Chăm sóc Khách hàng (CS Lead)",
   phone: "0912 445 566",
-  department: "Phòng Customer Success",
+  department: "cs",
   avatar_color: "emerald"
 )
 
@@ -33,14 +44,14 @@ mkt_user = User.create!(
   name: "Lê Hoàng Nam",
   email: "marketing@crm.saas",
   password: "password123",
-  role: "marketing",
+  role: "user",
   title: "Giám đốc Tăng trưởng (Growth Marketing)",
   phone: "0934 778 899",
-  department: "Phòng Marketing & Phân tích",
+  department: "marketing",
   avatar_color: "purple"
 )
 
-puts "✓ Đã tạo 3 tài khoản nhân viên (Sales, CS, Marketing)"
+puts "✓ Đã tạo 4 tài khoản (1 Admin và 3 User: Sales, CS, Marketing)"
 
 # 3. Seed B2B Customers
 customers_data = [

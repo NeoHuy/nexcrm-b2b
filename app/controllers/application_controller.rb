@@ -1,9 +1,26 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
-  helper_method :current_user, :logged_in?, :format_vnd
+  helper_method :current_user, :logged_in?, :format_vnd, :policy
 
   before_action :authenticate_user!
+
+  class NotAuthorizedError < StandardError; end
+  rescue_from NotAuthorizedError, with: :user_not_authorized
+
+  def policy(record)
+    policy_class = "#{record.is_a?(Class) ? record : record.class}Policy".constantize
+    policy_class.new(current_user, record)
+  end
+
+  def authorize(record, query = nil)
+    query ||= "#{action_name}?"
+    pol = policy(record)
+    unless pol.public_send(query)
+      raise NotAuthorizedError, "Bạn không có quyền thực hiện hành động này."
+    end
+    true
+  end
 
   private
 
@@ -20,6 +37,11 @@ class ApplicationController < ActionController::Base
       flash[:alert] = "Vui lòng đăng nhập để tiếp tục."
       redirect_to login_path
     end
+  end
+
+  def user_not_authorized(exception)
+    flash[:alert] = exception.message || "Bạn không có quyền thực hiện hành động này (Phân quyền theo Policy)."
+    redirect_back fallback_location: root_path
   end
 
   def format_vnd(amount)

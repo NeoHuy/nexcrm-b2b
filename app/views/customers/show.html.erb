@@ -26,13 +26,17 @@
     </div>
 
     <div class="flex items-center space-x-2">
-      <a href="<%= edit_customer_path(@customer) %>" class="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
-        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-        <span>Chỉnh sửa hồ sơ</span>
-      </a>
-      <%= button_to customer_path(@customer), method: :delete, data: { turbo_confirm: "Bạn chắc chắn muốn xóa khách hàng #{@customer.company_name}?" }, class: "px-3.5 py-2 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition flex items-center space-x-1.5" do %>
-        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-        <span>Xóa</span>
+      <% if policy(@customer).edit? %>
+        <a href="<%= edit_customer_path(@customer) %>" class="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+          <span>Chỉnh sửa hồ sơ</span>
+        </a>
+      <% end %>
+      <% if policy(@customer).destroy? %>
+        <%= button_to customer_path(@customer), method: :delete, data: { turbo_confirm: "Bạn chắc chắn muốn xóa khách hàng #{@customer.company_name}?" }, class: "px-3.5 py-2 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition flex items-center space-x-1.5" do %>
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Xóa (Admin)</span>
+        <% end %>
       <% end %>
     </div>
   </div>
@@ -131,40 +135,47 @@
 
         <!-- Quick Form to Record Debt / Payment -->
         <div class="pt-3 border-t border-slate-100">
-          <h3 class="text-xs font-bold text-slate-800 mb-2 flex items-center">
-            <i data-lucide="plus-circle" class="w-3.5 h-3.5 mr-1 text-indigo-600"></i>
-            Ghi nhận giao dịch công nợ mới
-          </h3>
+          <% if policy(@customer).manage_debt? %>
+            <h3 class="text-xs font-bold text-slate-800 mb-2 flex items-center">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5 mr-1 text-indigo-600"></i>
+              Ghi nhận giao dịch công nợ mới
+            </h3>
 
-          <%= form_with model: [@customer, @new_debt_transaction], class: "space-y-2.5 text-xs" do |f| %>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Loại giao dịch</label>
-                <%= f.select :transaction_type, [["Thu tiền (Payment)", "payment"], ["Hóa đơn phát sinh (Invoice)", "invoice"], ["Điều chỉnh nợ", "adjustment"]], {}, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500" %>
+            <%= form_with model: [@customer, @new_debt_transaction], class: "space-y-2.5 text-xs" do |f| %>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 mb-1">Loại giao dịch</label>
+                  <%= f.select :transaction_type, [["Thu tiền (Payment)", "payment"], ["Hóa đơn phát sinh (Invoice)", "invoice"], ["Điều chỉnh nợ", "adjustment"]], {}, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500" %>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 mb-1">Số tiền (VNĐ)</label>
+                  <%= f.number_field :amount, placeholder: "VD: 10000000", required: true, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 font-mono" %>
+                </div>
               </div>
-              <div>
-                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Số tiền (VNĐ)</label>
-                <%= f.number_field :amount, placeholder: "VD: 10000000", required: true, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 font-mono" %>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 mb-1">Mã tham chiếu / HĐ</label>
+                  <%= f.text_field :reference_code, placeholder: "HD-2026-...", class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none" %>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 mb-1">Ngày chứng từ</label>
+                  <%= f.date_field :transaction_date, value: Date.current, required: true, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none" %>
+                </div>
               </div>
+
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Ghi chú diễn giải</label>
+                <%= f.text_field :note, placeholder: "Nội dung chuyển khoản hoặc số hợp đồng...", class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none" %>
+              </div>
+
+              <%= f.submit "Lưu giao dịch công nợ", class: "w-full py-2 bg-slate-900 hover:bg-black text-white font-bold rounded-lg cursor-pointer transition text-xs shadow-sm" %>
+            <% end %>
+          <% else %>
+            <div class="p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 flex items-center space-x-2 border border-slate-200">
+              <i data-lucide="lock" class="w-4 h-4 text-slate-400 shrink-0"></i>
+              <span>Chức năng ghi nhận công nợ phân quyền cho <strong>Admin</strong> và <strong>CS</strong> (Customer Success).</span>
             </div>
-
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Mã tham chiếu / HĐ</label>
-                <%= f.text_field :reference_code, placeholder: "HD-2026-...", class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none" %>
-              </div>
-              <div>
-                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Ngày chứng từ</label>
-                <%= f.date_field :transaction_date, value: Date.current, required: true, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none" %>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-500 mb-1">Ghi chú diễn giải</label>
-              <%= f.text_field :note, placeholder: "Nội dung chuyển khoản hoặc số hợp đồng...", class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none" %>
-            </div>
-
-            <%= f.submit "Lưu giao dịch công nợ", class: "w-full py-2 bg-slate-900 hover:bg-black text-white font-bold rounded-lg cursor-pointer transition text-xs shadow-sm" %>
           <% end %>
         </div>
       </div>

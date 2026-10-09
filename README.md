@@ -37,17 +37,18 @@ Mở trình duyệt truy cập: **`http://localhost:3000`**
 
 ---
 
-## 👥 2. Tài khoản Demo & Vai trò (Đăng nhập tại Trang chủ)
+## 👥 2. Tài khoản Demo & Cơ chế Phân quyền Policy
 
-Trang chủ hệ thống tích hợp trực tiếp **Cổng đăng nhập** với tính năng **Đăng nhập nhanh 1-Click** hoặc nhập email/mật khẩu:
+Hệ thống phân biệt 2 cấp bậc người dùng: **Admin** và **User** (`role: 'admin' | 'user'`). Toàn bộ quyền thao tác được điều khiển độc lập thông qua **Policy Pattern** (`app/policies/`):
 
-| Vai trò | Email | Mật khẩu mặc định | Nhân sự đại diện | Trách nhiệm chính trong CRM |
+| Cấp bậc / Bộ phận | Email | Mật khẩu mặc định | Nhân sự | Quyền hạn theo Policy |
 | :--- | :--- | :--- | :--- | :--- |
-| **Sales (Kinh doanh)** | `sales@crm.saas` | `password123` | Nguyễn Văn Hùng | Quản lý Pipeline, đàm phán hợp đồng, khách hàng mục tiêu, doanh số |
-| **CS (Chăm sóc KH)** | `cs@crm.saas` | `password123` | Trần Thị Mai | Theo dõi sức khỏe KH, hỗ trợ kỹ thuật, **cảnh báo & thu hồi công nợ quá hạn** |
-| **Marketing (Tiếp thị)** | `marketing@crm.saas` | `password123` | Lê Hoàng Nam | Phân tích nguồn Lead B2B, phân khúc ngành nghề, tối ưu hóa tỷ lệ chuyển đổi |
+| 🛡️ **Admin (Quản trị)** | `admin@crm.saas` | `password123` | Quản trị viên | **Toàn quyền**: Tạo, sửa, **Xóa khách hàng B2B**, duyệt công nợ, quản lý nhân sự |
+| 🔵 **User - Sales** | `sales@crm.saas` | `password123` | Nguyễn Văn Hùng | Tạo & sửa khách hàng được giao, ghi nhật ký trao đổi/demo, xem công nợ (Không được xóa) |
+| 🟢 **User - CS** | `cs@crm.saas` | `password123` | Trần Thị Mai | Sửa thông tin CS, **ghi nhận hóa đơn & thu tiền công nợ**, đôn đốc nhắc nợ (Không được xóa) |
+| 🟣 **User - Marketing** | `marketing@crm.saas` | `password123` | Lê Hoàng Nam | **Chỉ xem (Read-only)** thông tin KH & công nợ, tạo Lead mới từ chiến dịch (Không sửa/xóa/thu tiền) |
 
-> **Lưu ý**: Có thanh chuyển đổi vai trò nhanh trên thanh điều hướng để bạn kiểm tra trực tiếp góc nhìn của từng bộ phận.
+> **Lưu ý**: Trang chủ và thanh điều hướng có nút **Đăng nhập nhanh 1-Click** cho cả 4 tài khoản để bạn kiểm tra cơ chế phân quyền Policy ngay lập tức.
 
 ---
 

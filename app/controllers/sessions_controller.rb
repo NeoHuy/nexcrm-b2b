@@ -20,8 +20,20 @@ class SessionsController < ApplicationController
   end
 
   def demo_login
-    role = params[:role].to_s
-    user = User.find_by(role: role) || User.first
+    role_key = params[:role].to_s
+    user = case role_key
+           when "admin"
+             User.find_by(role: "admin")
+           when "sales"
+             User.find_by(department: "sales")
+           when "cs"
+             User.find_by(department: "cs")
+           when "marketing"
+             User.find_by(department: "marketing")
+           else
+             User.find_by(role: role_key) || User.first
+           end
+
     if user
       session[:user_id] = user.id
       flash[:notice] = "Đã đăng nhập nhanh với vai trò: #{user.role_label} (#{user.name})"

@@ -19,35 +19,45 @@
         <span class="text-[11px] text-indigo-600 font-medium bg-white px-2 py-0.5 rounded-full border border-indigo-200">Không cần gõ mật khẩu</span>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <!-- Admin Quick Login -->
+        <%= button_to demo_login_path(role: "admin"), method: :post, class: "w-full text-left p-3 rounded-xl bg-white border border-slate-200 hover:border-rose-400 hover:shadow-md transition group" do %>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Admin</span>
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-500"></i>
+          </div>
+          <p class="text-xs font-semibold text-slate-800">Quản trị viên</p>
+          <p class="text-[10px] text-slate-500">Toàn quyền hệ thống</p>
+        <% end %>
+
         <!-- Sales Quick Login -->
         <%= button_to demo_login_path(role: "sales"), method: :post, class: "w-full text-left p-3 rounded-xl bg-white border border-slate-200 hover:border-blue-400 hover:shadow-md transition group" do %>
           <div class="flex items-center justify-between mb-1">
             <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">Sales</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition"></i>
+            <i data-lucide="target" class="w-3.5 h-3.5 text-blue-500"></i>
           </div>
           <p class="text-xs font-semibold text-slate-800">Nguyễn Văn Hùng</p>
-          <p class="text-[11px] text-slate-500">Quản lý Deal & Khách hàng</p>
+          <p class="text-[10px] text-slate-500">Deal & Khách hàng</p>
         <% end %>
 
         <!-- CS Quick Login -->
         <%= button_to demo_login_path(role: "cs"), method: :post, class: "w-full text-left p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-400 hover:shadow-md transition group" do %>
           <div class="flex items-center justify-between mb-1">
             <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">CS</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition"></i>
+            <i data-lucide="life-buoy" class="w-3.5 h-3.5 text-emerald-500"></i>
           </div>
           <p class="text-xs font-semibold text-slate-800">Trần Thị Mai</p>
-          <p class="text-[11px] text-slate-500">Theo dõi Công nợ & Chăm sóc</p>
+          <p class="text-[10px] text-slate-500">Công nợ & Chăm sóc</p>
         <% end %>
 
         <!-- Marketing Quick Login -->
         <%= button_to demo_login_path(role: "marketing"), method: :post, class: "w-full text-left p-3 rounded-xl bg-white border border-slate-200 hover:border-purple-400 hover:shadow-md transition group" do %>
           <div class="flex items-center justify-between mb-1">
             <span class="text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">Marketing</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-0.5 transition"></i>
+            <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-purple-500"></i>
           </div>
           <p class="text-xs font-semibold text-slate-800">Lê Hoàng Nam</p>
-          <p class="text-[11px] text-slate-500">Nguồn Lead & Phân khúc ngành</p>
+          <p class="text-[10px] text-slate-500">Lead & Ngành nghề</p>
         <% end %>
       </div>
     </div>

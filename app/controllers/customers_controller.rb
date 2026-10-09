@@ -2,6 +2,8 @@ class CustomersController < ApplicationController
   before_action :set_customer, only: [:show, :edit, :update, :destroy]
 
   def index
+    authorize Customer
+
     @query = params[:q]
     @status = params[:status]
     @industry = params[:industry]
@@ -35,6 +37,8 @@ class CustomersController < ApplicationController
   end
 
   def show
+    authorize @customer
+
     @activities = @customer.activities.includes(:user).order(occurred_at: :desc)
     @debt_transactions = @customer.debt_transactions.includes(:user).order(transaction_date: :desc)
     @new_activity = Activity.new(customer: @customer)
@@ -42,6 +46,8 @@ class CustomersController < ApplicationController
   end
 
   def new
+    authorize Customer
+
     @customer = Customer.new(
       status: "lead",
       tier: "standard",
@@ -51,6 +57,8 @@ class CustomersController < ApplicationController
   end
 
   def create
+    authorize Customer
+
     @customer = Customer.new(customer_params)
     @customer.assigned_user ||= current_user
 
@@ -71,9 +79,12 @@ class CustomersController < ApplicationController
   end
 
   def edit
+    authorize @customer
   end
 
   def update
+    authorize @customer
+
     if @customer.update(customer_params)
       flash[:notice] = "Đã cập nhật thông tin #{@customer.company_name} thành công!"
       redirect_to customer_path(@customer)
@@ -84,6 +95,8 @@ class CustomersController < ApplicationController
   end
 
   def destroy
+    authorize @customer
+
     company_name = @customer.company_name
     @customer.destroy
     flash[:notice] = "Đã xóa khách hàng #{company_name}."
