@@ -1,0 +1,339 @@
+<!-- Role Welcome Banner -->
+<div class="mb-8 p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <div>
+    <div class="flex items-center space-x-2.5 mb-2">
+      <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider <%= current_user.role_badge_class %>">
+        <%= current_user.role_label %>
+      </span>
+      <span class="text-xs text-slate-300">Không gian làm việc SaaS CRM</span>
+    </div>
+    <h1 class="text-2xl font-bold tracking-tight">Xin chào, <%= current_user.name %> 👋</h1>
+    <p class="text-sm text-slate-300 mt-1">
+      <% if current_user.sales? %>
+        Theo dõi tiến độ hợp đồng, khách hàng mục tiêu và chỉ số kinh doanh B2B của bạn.
+      <% elsif current_user.cs? %>
+        Cảnh báo công nợ quá hạn, sức khỏe tài khoản và theo dõi hỗ trợ khách hàng B2B.
+      <% elsif current_user.marketing? %>
+        Báo cáo phân khúc ngành nghề, nguồn Lead B2B và hiệu quả chuyển đổi thị trường.
+      <% end %>
+    </p>
+  </div>
+
+  <div class="flex items-center space-x-3">
+    <a href="<%= new_customer_path %>" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-900/50 flex items-center space-x-2 transition">
+      <i data-lucide="plus-circle" class="w-4 h-4"></i>
+      <span>Thêm khách hàng B2B</span>
+    </a>
+    <a href="<%= debts_path %>" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl backdrop-blur-sm border border-white/10 flex items-center space-x-2 transition">
+      <i data-lucide="receipt" class="w-4 h-4"></i>
+      <span>Sổ công nợ</span>
+    </a>
+  </div>
+</div>
+
+<!-- 4 Top KPI Metric Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <!-- Card 1: Total B2B Customers -->
+  <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Khách hàng B2B</span>
+      <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+        <i data-lucide="building" class="w-5 h-5"></i>
+      </div>
+    </div>
+    <div class="text-2xl font-black text-slate-900"><%= @total_customers %></div>
+    <div class="mt-2 flex items-center text-xs text-slate-500">
+      <span class="text-emerald-600 font-semibold flex items-center mr-1.5">
+        <i data-lucide="trending-up" class="w-3.5 h-3.5 mr-0.5"></i> 100% B2B
+      </span>
+      <span>doanh nghiệp đối tác</span>
+    </div>
+  </div>
+
+  <!-- Card 2: Total Contract Revenue -->
+  <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Tổng doanh số HĐ</span>
+      <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+        <i data-lucide="badge-dollar-sign" class="w-5 h-5"></i>
+      </div>
+    </div>
+    <div class="text-2xl font-black text-slate-900"><%= format_vnd(@total_revenue) %></div>
+    <div class="mt-2 text-xs text-slate-500 flex items-center">
+      <span>Giá trị lũy kế từ hợp đồng</span>
+    </div>
+  </div>
+
+  <!-- Card 3: Total Outstanding Debt -->
+  <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Tổng công nợ tồn đọng</span>
+      <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+        <i data-lucide="clock-alert" class="w-5 h-5"></i>
+      </div>
+    </div>
+    <div class="text-2xl font-black text-slate-900"><%= format_vnd(@total_debt) %></div>
+    <div class="mt-2 text-xs text-amber-700 font-medium flex items-center">
+      <i data-lucide="info" class="w-3.5 h-3.5 mr-1"></i>
+      <%= @due_soon_customers.count %> khoản sắp đến hạn
+    </div>
+  </div>
+
+  <!-- Card 4: Overdue Debt Alarm -->
+  <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition <%= @overdue_customers.count > 0 ? 'ring-2 ring-rose-300 bg-rose-50/20' : '' %>">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Nợ quá hạn cần xử lý</span>
+      <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+        <i data-lucide="alert-octagon" class="w-5 h-5"></i>
+      </div>
+    </div>
+    <div class="text-2xl font-black text-rose-600">
+      <%= @overdue_customers.count %> <span class="text-sm font-normal text-slate-500">doanh nghiệp</span>
+    </div>
+    <div class="mt-2 text-xs text-rose-600 font-bold flex items-center">
+      <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 mr-0.5"></i>
+      <%= format_vnd(@overdue_customers.sum(:current_debt)) %>
+    </div>
+  </div>
+</div>
+
+<!-- Role Tailored Action & Insights Panel -->
+<% if current_user.sales? %>
+  <!-- SALES VIEW -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+          <i data-lucide="target" class="w-4 h-4"></i>
+        </div>
+        <h2 class="text-base font-bold text-slate-900">Bảng điều phối kinh doanh (Dành riêng cho Sales)</h2>
+      </div>
+      <span class="text-xs bg-blue-50 text-blue-700 font-bold px-2.5 py-1 rounded-full border border-blue-200">
+        Khách hàng bạn phụ trách: <%= @my_customers.count %>
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <span class="text-xs text-slate-500 font-medium">Đang đàm phán & Pipeline:</span>
+        <p class="text-xl font-bold text-slate-900 mt-1"><%= @my_pipeline_count %> KH</p>
+      </div>
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <span class="text-xs text-slate-500 font-medium">Hợp đồng đang thực thi:</span>
+        <p class="text-xl font-bold text-emerald-600 mt-1"><%= @my_active_count %> KH</p>
+      </div>
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <span class="text-xs text-slate-500 font-medium">Công nợ phụ trách thu hồi:</span>
+        <p class="text-xl font-bold text-rose-600 mt-1"><%= format_vnd(@my_debt) %></p>
+      </div>
+    </div>
+  </div>
+
+<% elsif current_user.cs? %>
+  <!-- CUSTOMER SUCCESS VIEW -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+        </div>
+        <h2 class="text-base font-bold text-slate-900">Giám sát Sức khỏe Khách hàng & Thu hồi Công nợ (CS Center)</h2>
+      </div>
+      <span class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+        Độ trễ công nợ & Risk Alert
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Urgent Overdue List -->
+      <div class="bg-red-50/50 rounded-xl p-4 border border-red-100">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-red-800 flex items-center mb-3">
+          <i data-lucide="alert-triangle" class="w-4 h-4 mr-1.5 text-red-600"></i>
+          Khách hàng nợ quá hạn ưu tiên gọi CS nhắc nợ
+        </h3>
+        <div class="space-y-2">
+          <% @cs_urgent_debts.each do |c| %>
+            <div class="bg-white p-3 rounded-lg border border-red-200 flex items-center justify-between">
+              <div>
+                <a href="<%= customer_path(c) %>" class="text-sm font-bold text-slate-900 hover:text-indigo-600"><%= c.company_name %></a>
+                <p class="text-xs text-red-600 font-medium">Nợ: <%= format_vnd(c.current_debt) %> (Quá hạn <%= c.days_overdue %> ngày)</p>
+              </div>
+              <a href="<%= customer_path(c) %>" class="px-2.5 py-1 text-xs font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                Nhắc nợ
+              </a>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- At Risk Clients -->
+      <div class="bg-amber-50/50 rounded-xl p-4 border border-amber-100">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center mb-3">
+          <i data-lucide="life-buoy" class="w-4 h-4 mr-1.5 text-amber-600"></i>
+          Doanh nghiệp có cảnh báo nguy cơ (At Risk)
+        </h3>
+        <div class="space-y-2">
+          <% @cs_at_risk.each do |c| %>
+            <div class="bg-white p-3 rounded-lg border border-amber-200 flex items-center justify-between">
+              <div>
+                <a href="<%= customer_path(c) %>" class="text-sm font-bold text-slate-900 hover:text-indigo-600"><%= c.company_name %></a>
+                <p class="text-xs text-slate-500"><%= c.industry %> • <%= c.contact_name %></p>
+              </div>
+              <a href="<%= customer_path(c) %>" class="px-2.5 py-1 text-xs font-semibold bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition">
+                Chăm sóc
+              </a>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<% elsif current_user.marketing? %>
+  <!-- MARKETING VIEW -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
+          <i data-lucide="pie-chart" class="w-4 h-4"></i>
+        </div>
+        <h2 class="text-base font-bold text-slate-900">Phân tích Phân khúc Khách hàng B2B & Lead Acquisition (Marketing)</h2>
+      </div>
+      <span class="text-xs bg-purple-50 text-purple-700 font-bold px-2.5 py-1 rounded-full border border-purple-200">
+        Lead Generation Analytics
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Lead Source Breakdown -->
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Hiệu quả nguồn tiếp cận khách hàng B2B</h3>
+        <div class="space-y-2.5">
+          <% @source_breakdown.each do |source, count| %>
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span class="text-slate-700"><%= source || 'Chưa định danh' %></span>
+                <span class="text-purple-600"><%= count %> KH</span>
+              </div>
+              <div class="w-full bg-slate-200 rounded-full h-2">
+                <div class="bg-purple-600 h-2 rounded-full" style="width: <%= [((count.to_f / @total_customers) * 100).round, 100].min %>%"></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Industry Breakdown -->
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Phân bổ ngành nghề khách hàng B2B</h3>
+        <div class="space-y-2.5">
+          <% @industry_breakdown.each do |ind, count| %>
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span class="text-slate-700"><%= ind || 'Khác' %></span>
+                <span class="text-indigo-600"><%= count %> KH</span>
+              </div>
+              <div class="w-full bg-slate-200 rounded-full h-2">
+                <div class="bg-indigo-600 h-2 rounded-full" style="width: <%= [((count.to_f / @total_customers) * 100).round, 100].min %>%"></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<!-- 2 Column Section: Recent Customers & CRM Activity Feed -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <!-- Left: Recent B2B Customers (2 cols) -->
+  <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <i data-lucide="building-2" class="w-5 h-5 text-indigo-600"></i>
+        <h2 class="font-bold text-slate-900">Khách hàng B2B gần đây</h2>
+      </div>
+      <a href="<%= customers_path %>" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1">
+        <span>Xem tất cả (<%= @total_customers %>)</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
+
+    <div class="divide-y divide-slate-100">
+      <% @recent_customers.each do |c| %>
+        <div class="p-4 hover:bg-slate-50 transition flex items-center justify-between">
+          <div class="flex items-start space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-bold flex items-center justify-center shrink-0 border border-slate-200">
+              <%= c.company_name[0..1].upcase %>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <a href="<%= customer_path(c) %>" class="font-bold text-slate-900 text-sm hover:text-indigo-600 transition">
+                  <%= c.company_name %>
+                </a>
+                <span class="text-[10px] px-2 py-0.5 rounded-full border <%= c.status_badge[:class] %>">
+                  <%= c.status_badge[:label] %>
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full border <%= c.tier_badge[:class] %>">
+                  <%= c.tier_badge[:label] %>
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">
+                <span>MST: <%= c.tax_code || '---' %></span> • 
+                <span>Ngành: <%= c.industry %></span> • 
+                <span>Người liên hệ: <%= c.contact_name %> (<%= c.contact_phone %>)</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="text-right shrink-0 pl-4">
+            <div class="text-xs font-bold <%= c.overdue? ? 'text-rose-600' : 'text-slate-900' %>">
+              <%= format_vnd(c.current_debt) %>
+            </div>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded border inline-block mt-0.5 <%= c.debt_badge[:class] %>">
+              <%= c.debt_badge[:label] %>
+            </span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Right: Recent CRM Activities Feed (1 col) -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <i data-lucide="history" class="w-5 h-5 text-indigo-600"></i>
+        <h2 class="font-bold text-slate-900">Nhật ký tương tác mới</h2>
+      </div>
+      <span class="text-xs text-slate-400">Thời gian thực</span>
+    </div>
+
+    <div class="p-4 flex-1 space-y-4 overflow-y-auto max-h-[500px]">
+      <% if @recent_activities.empty? %>
+        <p class="text-xs text-slate-400 text-center py-8">Chưa có hoạt động tương tác nào.</p>
+      <% else %>
+        <% @recent_activities.each do |act| %>
+          <div class="flex items-start space-x-3 text-xs">
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+              <i data-lucide="<%= act.type_info[:icon] %>" class="w-3.5 h-3.5"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900"><%= act.user.name %></span>
+                <span class="text-[10px] text-slate-400"><%= act.occurred_at ? act.occurred_at.strftime("%d/%m %H:%M") : 'Vừa xong' %></span>
+              </div>
+              <p class="text-slate-600 font-medium mt-0.5">
+                <a href="<%= customer_path(act.customer) %>" class="text-indigo-600 hover:underline font-bold"><%= act.customer.company_name %></a>:
+                <%= act.title %>
+              </p>
+              <% if act.content.present? %>
+                <p class="text-slate-400 text-[11px] line-clamp-2 mt-0.5"><%= act.content %></p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

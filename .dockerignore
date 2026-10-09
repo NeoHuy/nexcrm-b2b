@@ -1,0 +1,13 @@
+.git
+.gitignore
+.dockerignore
+.ruby-version
+log/*
+tmp/*
+!log/.keep
+!tmp/.keep
+storage/*
+!storage/.keep
+node_modules
+.DS_Store
+*.md

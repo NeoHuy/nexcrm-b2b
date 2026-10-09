@@ -1,0 +1,13 @@
+<div class="max-w-4xl mx-auto space-y-6">
+  <div class="flex items-center space-x-3">
+    <a href="<%= customer_path(@customer) %>" class="p-2 text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i>
+    </a>
+    <div>
+      <h1 class="text-2xl font-black text-slate-900">Chỉnh sửa hồ sơ: <%= @customer.company_name %></h1>
+      <p class="text-xs text-slate-500">Cập nhật thông tin pháp nhân, người đại diện, hạn mức và phân loại khách hàng</p>
+    </div>
+  </div>
+
+  <%= render "form", customer: @customer %>
+</div>

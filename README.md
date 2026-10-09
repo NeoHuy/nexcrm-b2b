@@ -1,0 +1,124 @@
+# 🏢 NexCRM B2B - Nền tảng SaaS Quản lý Khách hàng Doanh nghiệp & Công nợ
+
+Hệ thống **CRM B2B (SaaS)** cơ bản được xây dựng hoàn toàn bằng **Ruby on Rails 8**, đáp ứng đầy đủ yêu cầu quản lý khách hàng doanh nghiệp, theo dõi công nợ, phân quyền vai trò cho **Sales**, **CS (Customer Success)**, và **Marketing**.
+
+---
+
+## 🚀 1. Hướng dẫn khởi chạy ứng dụng
+
+### Cách 1: Chạy bằng Docker (Khuyên dùng)
+Chỉ cần chạy 1 câu lệnh duy nhất:
+
+```bash
+docker compose up --build
+```
+> Hệ thống sẽ tự động khởi động service PostgreSQL 16, build image Rails 8, tự động migrate database, nạp sẵn dữ liệu mẫu B2B (seeds) và mount volume `pg_data` lưu trữ dữ liệu bền vững.
+
+---
+
+### Cách 2: Chạy trực tiếp từ máy tính (Local)
+
+Yêu cầu máy tính có cài đặt PostgreSQL đang chạy ở port 5432.
+
+```bash
+# 1. Cài đặt các gem và chuẩn bị database PostgreSQL
+bin/setup
+
+# Hoặc chạy thủ công:
+bundle install
+bin/rails db:prepare
+bin/rails db:seed
+
+# 2. Khởi động server CRM
+bin/rails server
+```
+
+Mở trình duyệt truy cập: **`http://localhost:3000`**
+
+---
+
+## 👥 2. Tài khoản Demo & Vai trò (Đăng nhập tại Trang chủ)
+
+Trang chủ hệ thống tích hợp trực tiếp **Cổng đăng nhập** với tính năng **Đăng nhập nhanh 1-Click** hoặc nhập email/mật khẩu:
+
+| Vai trò | Email | Mật khẩu mặc định | Nhân sự đại diện | Trách nhiệm chính trong CRM |
+| :--- | :--- | :--- | :--- | :--- |
+| **Sales (Kinh doanh)** | `sales@crm.saas` | `password123` | Nguyễn Văn Hùng | Quản lý Pipeline, đàm phán hợp đồng, khách hàng mục tiêu, doanh số |
+| **CS (Chăm sóc KH)** | `cs@crm.saas` | `password123` | Trần Thị Mai | Theo dõi sức khỏe KH, hỗ trợ kỹ thuật, **cảnh báo & thu hồi công nợ quá hạn** |
+| **Marketing (Tiếp thị)** | `marketing@crm.saas` | `password123` | Lê Hoàng Nam | Phân tích nguồn Lead B2B, phân khúc ngành nghề, tối ưu hóa tỷ lệ chuyển đổi |
+
+> **Lưu ý**: Có thanh chuyển đổi vai trò nhanh trên thanh điều hướng để bạn kiểm tra trực tiếp góc nhìn của từng bộ phận.
+
+---
+
+## 🎯 3. Các tính năng cốt lõi đã triển khai
+
+### A. Quản lý Khách hàng Doanh nghiệp B2B (B2B Customer Management)
+- **Hồ sơ Pháp nhân**: Tên doanh nghiệp, Mã số thuế (MST), Ngành nghề kinh doanh, Quy mô nhân sự (50-200, 500+ NV), Website, Địa chỉ trụ sở, Tỉnh/Thành phố.
+- **Phân loại & Hạng B2B**: 
+  - Phân hạng: *Tiêu chuẩn, Bạc (Silver), Vàng (Gold), VIP Doanh nghiệp*.
+  - Trạng thái: *Tiềm năng (Lead), Đang đàm phán, Đang hợp tác, Cảnh báo rủi ro (At-risk), Ngưng hợp tác*.
+- **Người đại diện liên hệ (Decision Maker)**: Họ tên, Chức vụ (Giám đốc, Kế toán trưởng, Head of Product...), Số điện thoại, Email.
+- **Đầu mối phụ trách**: Gán nhân viên Sales hoặc CS phụ trách chính (Account Manager).
+- **Bộ lọc & Tìm kiếm đa tiêu chí**: Tìm theo tên công ty, MST, người liên hệ, lọc theo ngành nghề, trạng thái hợp tác và tình trạng nợ.
+
+### B. Quản lý Công nợ & Tài chính B2B (Debt & Receivables Management)
+- **Hạn mức tín dụng (Credit Limit)**: Thiết lập hạn mức công nợ cho phép cho từng doanh nghiệp.
+- **Theo dõi Công nợ hiện tại**: Thanh trực quan tỷ lệ sử dụng hạn mức (Credit Utilization).
+- **Cảnh báo công nợ tự động**:
+  - 🚨 **Nợ quá hạn**: Hiển thị số ngày quá hạn (e.g., trễ 24 ngày, 45 ngày) với nhãn cảnh báo đỏ để CS/Sales đôn đốc thanh toán.
+  - ⚠️ **Sắp đến hạn**: Cảnh báo các khoản nợ cần thanh toán trong vòng 7 ngày tới.
+  - ✅ **Đã tất toán / Trong hạn**.
+- **Ghi nhận giao dịch công nợ**:
+  - Ghi nhận phát sinh nợ mới (*Invoice / Hóa đơn*).
+  - Ghi nhận thanh toán (*Payment / Thu tiền*).
+  - Lịch sử sổ phụ các lần thanh toán, mã tham chiếu HĐ và người thực hiện.
+- **Sổ theo dõi công nợ chuyên biệt (`/debts`)**: Xem tổng công nợ toàn hệ thống, danh sách ưu tiên thu hồi cho bộ phận CS và Sales.
+
+### C. Nhật ký Chăm sóc & Lịch sử Tương tác (CRM Activities Timeline)
+- Ghi lại mọi hoạt động: **Cuộc gọi (Call)**, **Họp / Demo**, **Email**, **Hỗ trợ CS**, **Nhắc nợ**, **Ghi chú nội bộ**.
+- Lưu trữ người thực hiện, thời gian tương tác và **Lịch hẹn tiếp theo (Next Follow-up)**.
+- Timeline sắp xếp trực quan theo thời gian thực tại trang chi tiết từng khách hàng.
+
+### D. Dashboard phân tích theo từng vai trò
+- **Sales View**: Theo dõi pipeline đàm phán, doanh số hợp đồng, danh sách khách hàng được gán cho bản thân.
+- **CS View**: Bảng điều khiển công nợ quá hạn khẩn cấp, danh sách khách hàng có nguy cơ rời bỏ (At-risk).
+- **Marketing View**: Biểu đồ phân bổ nguồn Lead (Google Ads, Referral, Outbound, Hội thảo) và cơ cấu khách hàng theo từng ngành nghề.
+
+---
+
+## 🛠️ Cấu trúc thư mục dự án
+
+```text
+fearless-maxwell/
+├── app/
+│   ├── controllers/
+│   │   ├── application_controller.rb  # Auth, định dạng tiền tệ VNĐ
+│   │   ├── sessions_controller.rb     # Đăng nhập chuẩn & 1-click Demo
+│   │   ├── dashboard_controller.rb    # Bảng điều khiển phân quyền Sales/CS/Mkt
+│   │   ├── customers_controller.rb    # Quản lý khách hàng B2B, bộ lọc, tìm kiếm
+│   │   ├── activities_controller.rb   # Ghi nhật ký tương tác & hẹn lịch
+│   │   ├── debt_transactions_controller.rb # Ghi nhận thu tiền & hóa đơn nợ
+│   │   └── debts_controller.rb        # Sổ theo dõi công nợ B2B chuyên biệt
+│   ├── models/
+│   │   ├── user.rb                    # Phân quyền Sales, CS, Marketing
+│   │   ├── customer.rb                # Mô hình B2B, tính toán nợ quá hạn, scopes
+│   │   ├── activity.rb                # Lịch sử tương tác & chăm sóc
+│   │   └── debt_transaction.rb        # Giao dịch công nợ, cập nhật tự động số dư
+│   └── views/
+│       ├── layouts/application.html.erb # Giao diện chuẩn SaaS Tailwind CSS & Lucide Icons
+│       ├── sessions/new.html.erb      # Trang đăng nhập tại trang chủ
+│       ├── dashboard/index.html.erb   # Dashboard chỉ số KPI & vai trò
+│       ├── customers/                 # Index, Show, New, Edit, _Form
+│       └── debts/index.html.erb       # Bảng quản lý công nợ
+├── config/
+│   ├── routes.rb                      # Định tuyến
+│   └── database.yml                   # Cấu hình PostgreSQL
+├── db/
+│   ├── migrate/                       # Các migration bảng users, customers, activities, debt_transactions
+│   ├── schema.rb                      # Schema cơ sở dữ liệu
+│   └── seeds.rb                       # Dữ liệu B2B mẫu đa dạng (FPT, VinRetail, Sài Gòn Express...)
+└── bin/
+    ├── setup                          # Script tự động cài đặt & khởi tạo
+    └── rails                          # Rails executable
+```

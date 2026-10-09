@@ -1,0 +1,156 @@
+<%= form_with model: customer, class: "space-y-6" do |f| %>
+  <% if customer.errors.any? %>
+    <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+      <div class="font-bold mb-1">Vui lòng sửa các lỗi sau:</div>
+      <ul class="list-disc list-inside space-y-0.5">
+        <% customer.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <!-- Block 1: B2B Company Information -->
+  <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="border-b border-slate-100 pb-2 flex items-center space-x-2">
+      <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+        <i data-lucide="building" class="w-4 h-4"></i>
+      </div>
+      <h2 class="text-sm font-bold text-slate-900">1. Thông tin pháp nhân Doanh nghiệp (B2B)</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Tên Công ty / Doanh nghiệp <span class="text-rose-500">*</span></label>
+        <%= f.text_field :company_name, placeholder: "VD: Công ty Cổ phần Công nghệ VNTech", required: true, class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-medium" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Mã số thuế (MST)</label>
+        <%= f.text_field :tax_code, placeholder: "VD: 0108923456", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-mono" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Website doanh nghiệp</label>
+        <%= f.text_field :website, placeholder: "vntech-solution.vn", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Ngành nghề kinh doanh</label>
+        <%= f.select :industry, Customer::INDUSTRIES, { prompt: "-- Chọn ngành nghề --" }, class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Quy mô nhân sự</label>
+        <%= f.select :company_size, ["Dưới 20 nhân viên", "20 - 50 nhân viên", "50 - 200 nhân viên", "200 - 500 nhân viên", "Trên 500 nhân viên"], { prompt: "-- Chọn quy mô --" }, class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Phân hạng khách hàng (Tier)</label>
+        <%= f.select :tier, Customer::TIERS.invert, {}, class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-medium" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Trạng thái hợp tác</label>
+        <%= f.select :status, Customer::STATUSES.invert, {}, class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-medium" %>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Địa chỉ trụ sở</label>
+        <%= f.text_field :address, placeholder: "Số nhà, tên đường, phường/xã...", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Tỉnh / Thành phố</label>
+        <%= f.text_field :city, placeholder: "Hà Nội, TP.HCM, Đà Nẵng...", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Nguồn tiếp cận (Lead Source)</label>
+        <%= f.select :lead_source, Customer::LEAD_SOURCES, { prompt: "-- Chọn nguồn Lead --" }, class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block 2: Primary Contact Person -->
+  <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="border-b border-slate-100 pb-2 flex items-center space-x-2">
+      <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+        <i data-lucide="user" class="w-4 h-4"></i>
+      </div>
+      <h2 class="text-sm font-bold text-slate-900">2. Đại diện liên hệ chính (Key Decision Maker)</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Họ và tên người đại diện</label>
+        <%= f.text_field :contact_name, placeholder: "VD: Nguyễn Văn Toàn", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Chức vụ</label>
+        <%= f.text_field :contact_title, placeholder: "VD: Giám đốc CNTT / Trưởng phòng Mua hàng", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Số điện thoại liên hệ</label>
+        <%= f.text_field :contact_phone, placeholder: "VD: 0912 345 678", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-mono" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Email liên hệ</label>
+        <%= f.email_field :contact_email, placeholder: "toan.nguyen@vntech.vn", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block 3: Financial & Debt Settings -->
+  <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="border-b border-slate-100 pb-2 flex items-center space-x-2">
+      <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+        <i data-lucide="receipt" class="w-4 h-4"></i>
+      </div>
+      <h2 class="text-sm font-bold text-slate-900">3. Chính sách Tài chính & Hạn mức Công nợ</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Công nợ hiện tại (VNĐ)</label>
+        <%= f.number_field :current_debt, step: "1000", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-mono" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Hạn mức công nợ cho phép (VNĐ)</label>
+        <%= f.number_field :credit_limit, step: "1000", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-mono" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Hạn thanh toán công nợ</label>
+        <%= f.date_field :payment_due_date, class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Tổng doanh số hợp đồng lũy kế (VNĐ)</label>
+        <%= f.number_field :total_revenue, step: "1000", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-mono" %>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Nhân viên phụ trách tài khoản (Account Manager)</label>
+        <%= f.collection_select :assigned_user_id, User.order(:role, :name), :id, ->(u) { "#{u.name} - #{u.role_label}" }, { prompt: "-- Chọn nhân viên phụ trách --" }, class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Ghi chú đặc thù / Thỏa thuận riêng</label>
+        <%= f.text_area :notes, rows: 3, placeholder: "Ghi chú điều khoản thanh toán, chu kỳ hóa đơn...", class: "w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="flex items-center justify-end space-x-3 pt-4">
+    <a href="<%= customer.persisted? ? customer_path(customer) : customers_path %>" class="px-5 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+      Hủy bỏ
+    </a>
+    <%= f.submit customer.persisted? ? "Cập nhật hồ sơ B2B" : "Tạo mới khách hàng B2B", class: "px-6 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-100 transition cursor-pointer" %>
+  </div>
+<% end %>

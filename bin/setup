@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+echo "== Đang cài đặt thư viện Gems... =="
+bundle install
+
+echo "== Đang chuẩn bị cơ sở dữ liệu PostgreSQL & nạp dữ liệu mẫu =="
+bin/rails db:prepare
+bin/rails db:seed
+
+echo "== Hoàn tất thiết lập NexCRM B2B! =="
+echo "Khởi chạy server bằng lệnh: bin/rails server"

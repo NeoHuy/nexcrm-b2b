@@ -1,0 +1,372 @@
+<div class="space-y-6">
+  <!-- Top Navigation & Actions Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+      <a href="<%= customers_path %>" class="p-2 text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      </a>
+      <div>
+        <div class="flex items-center space-x-2.5">
+          <h1 class="text-2xl font-black text-slate-900"><%= @customer.company_name %></h1>
+          <span class="text-xs px-2.5 py-0.5 rounded-full border <%= @customer.tier_badge[:class] %>">
+            <%= @customer.tier_badge[:label] %>
+          </span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full border <%= @customer.status_badge[:class] %>">
+            <%= @customer.status_badge[:label] %>
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1 flex items-center space-x-3">
+          <span>MST: <strong class="font-mono text-slate-700"><%= @customer.tax_code || '---' %></strong></span>
+          <span>•</span>
+          <span>Ngành nghề: <strong class="text-slate-700"><%= @customer.industry %></strong></span>
+          <span>•</span>
+          <span>Quy mô: <strong class="text-slate-700"><%= @customer.company_size %></strong></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <a href="<%= edit_customer_path(@customer) %>" class="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+        <span>Chỉnh sửa hồ sơ</span>
+      </a>
+      <%= button_to customer_path(@customer), method: :delete, data: { turbo_confirm: "Bạn chắc chắn muốn xóa khách hàng #{@customer.company_name}?" }, class: "px-3.5 py-2 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition flex items-center space-x-1.5" do %>
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+        <span>Xóa</span>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 2 Column Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- LEFT COLUMN (1 col): Company Details, Contact, Debt Card -->
+    <div class="space-y-6">
+      <!-- 1. Key Contact Card -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+          <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="user-check" class="w-4 h-4 text-indigo-600"></i>
+            <span>Người đại diện liên hệ</span>
+          </h2>
+          <span class="text-[10px] text-slate-400">B2B Decision Maker</span>
+        </div>
+
+        <div class="flex items-start space-x-3.5 mb-4">
+          <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center shrink-0 border border-indigo-100 text-base">
+            <%= @customer.contact_name.present? ? @customer.contact_name.split.last[0] : 'K' %>
+          </div>
+          <div>
+            <div class="font-bold text-slate-900 text-sm"><%= @customer.contact_name || 'Chưa cập nhật' %></div>
+            <div class="text-xs text-indigo-600 font-medium"><%= @customer.contact_title || 'Đại diện doanh nghiệp' %></div>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 text-xs text-slate-600">
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+            <span class="text-slate-400 flex items-center"><i data-lucide="phone" class="w-3.5 h-3.5 mr-1.5"></i>Số điện thoại:</span>
+            <span class="font-bold text-slate-800 font-mono"><%= @customer.contact_phone || '---' %></span>
+          </div>
+
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+            <span class="text-slate-400 flex items-center"><i data-lucide="mail" class="w-3.5 h-3.5 mr-1.5"></i>Email:</span>
+            <span class="font-semibold text-slate-800"><%= @customer.contact_email || '---' %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Financial & Debt Management Widget -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+          <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="receipt" class="w-4 h-4 text-rose-600"></i>
+            <span>Quản lý Công nợ & Tài chính</span>
+          </h2>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded border <%= @customer.debt_badge[:class] %>">
+            <%= @customer.debt_badge[:label] %>
+          </span>
+        </div>
+
+        <!-- Numbers Grid -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Công nợ hiện tại</span>
+            <div class="text-base font-black <%= @customer.overdue? ? 'text-rose-600' : 'text-slate-900' %> mt-0.5">
+              <%= format_vnd(@customer.current_debt) %>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Hạn mức cho phép</span>
+            <div class="text-base font-black text-slate-700 mt-0.5">
+              <%= format_vnd(@customer.credit_limit) %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Credit Utilization Bar -->
+        <div class="mb-4">
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-slate-500">Tỷ lệ sử dụng hạn mức</span>
+            <span class="font-bold text-slate-800"><%= @customer.credit_utilization %>%</span>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-2">
+            <div class="h-2 rounded-full <%= @customer.credit_utilization > 80 ? 'bg-rose-500' : 'bg-indigo-600' %>" style="width: <%= @customer.credit_utilization %>%"></div>
+          </div>
+        </div>
+
+        <!-- Payment Due Date -->
+        <div class="p-3 rounded-xl <%= @customer.overdue? ? 'bg-rose-50 border border-rose-200 text-rose-800' : 'bg-slate-50 border border-slate-200 text-slate-700' %> text-xs mb-4">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold flex items-center">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5"></i>Hạn thanh toán:
+            </span>
+            <span class="font-bold"><%= @customer.payment_due_date ? @customer.payment_due_date.strftime("%d/%m/%Y") : 'Chưa thiết lập' %></span>
+          </div>
+          <% if @customer.overdue? %>
+            <div class="text-rose-600 font-bold mt-1 text-[11px]">
+              ⚠️ Đã quá hạn <%= @customer.days_overdue %> ngày - Cần đôn đốc thanh toán!
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Quick Form to Record Debt / Payment -->
+        <div class="pt-3 border-t border-slate-100">
+          <h3 class="text-xs font-bold text-slate-800 mb-2 flex items-center">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5 mr-1 text-indigo-600"></i>
+            Ghi nhận giao dịch công nợ mới
+          </h3>
+
+          <%= form_with model: [@customer, @new_debt_transaction], class: "space-y-2.5 text-xs" do |f| %>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Loại giao dịch</label>
+                <%= f.select :transaction_type, [["Thu tiền (Payment)", "payment"], ["Hóa đơn phát sinh (Invoice)", "invoice"], ["Điều chỉnh nợ", "adjustment"]], {}, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500" %>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Số tiền (VNĐ)</label>
+                <%= f.number_field :amount, placeholder: "VD: 10000000", required: true, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 font-mono" %>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Mã tham chiếu / HĐ</label>
+                <%= f.text_field :reference_code, placeholder: "HD-2026-...", class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none" %>
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-500 mb-1">Ngày chứng từ</label>
+                <%= f.date_field :transaction_date, value: Date.current, required: true, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none" %>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-500 mb-1">Ghi chú diễn giải</label>
+              <%= f.text_field :note, placeholder: "Nội dung chuyển khoản hoặc số hợp đồng...", class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none" %>
+            </div>
+
+            <%= f.submit "Lưu giao dịch công nợ", class: "w-full py-2 bg-slate-900 hover:bg-black text-white font-bold rounded-lg cursor-pointer transition text-xs shadow-sm" %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- 3. Company Extra Details -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm text-xs space-y-3">
+        <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center space-x-1.5">
+          <i data-lucide="info" class="w-4 h-4 text-slate-500"></i>
+          <span>Thông tin doanh nghiệp</span>
+        </h2>
+
+        <div>
+          <span class="text-slate-400 block text-[10px]">Trụ sở chính:</span>
+          <span class="text-slate-800 font-medium"><%= @customer.address.present? ? "#{@customer.address}, #{@customer.city}" : (@customer.city || 'Chưa cập nhật') %></span>
+        </div>
+
+        <div>
+          <span class="text-slate-400 block text-[10px]">Website doanh nghiệp:</span>
+          <% if @customer.website.present? %>
+            <a href="<%= @customer.website.start_with?('http') ? @customer.website : "https://#{@customer.website}" %>" target="_blank" class="text-indigo-600 hover:underline font-semibold flex items-center">
+              <i data-lucide="external-link" class="w-3 h-3 mr-1"></i><%= @customer.website %>
+            </a>
+          <% else %>
+            <span class="text-slate-400">---</span>
+          <% end %>
+        </div>
+
+        <div>
+          <span class="text-slate-400 block text-[10px]">Nguồn khách hàng (Lead Source):</span>
+          <span class="text-slate-800 font-semibold"><%= @customer.lead_source || 'Tiếp cận trực tiếp' %></span>
+        </div>
+
+        <div>
+          <span class="text-slate-400 block text-[10px]">Nhân viên phụ trách:</span>
+          <% if @customer.assigned_user.present? %>
+            <span class="text-slate-900 font-bold"><%= @customer.assigned_user.name %></span>
+            <span class="text-[10px] text-slate-500">(<%= @customer.assigned_user.role_label %>)</span>
+          <% else %>
+            <span class="text-slate-400">Chưa chỉ định</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN (2 cols): Interaction Logs & History Timeline -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- 1. Form to Log New CRM Interaction -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+          <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="message-square-plus" class="w-4 h-4 text-indigo-600"></i>
+            <span>Ghi lại hoạt động tương tác khách hàng</span>
+          </h2>
+          <span class="text-[10px] text-slate-400">Sales / CS / Marketing</span>
+        </div>
+
+        <%= form_with model: [@customer, @new_activity], class: "space-y-3 text-xs" do |f| %>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-500 mb-1">Hình thức tương tác</label>
+              <%= f.select :activity_type, Activity::ACTIVITY_TYPES.map { |k, v| [v[:label], k] }, {}, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-1 focus:ring-indigo-500" %>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-[10px] font-semibold text-slate-500 mb-1">Tiêu đề hoạt động</label>
+              <%= f.text_field :title, placeholder: "VD: Họp demo giải pháp, Gọi nhắc thanh toán HĐ đợt 2...", required: true, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-1 focus:ring-indigo-500" %>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nội dung chi tiết / Kết quả trao đổi</label>
+            <%= f.text_area :content, rows: 2, placeholder: "Nêu các phản hồi chính của khách hàng, cam kết tiến độ...", class: "w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-1 focus:ring-indigo-500" %>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-500 mb-1">Thời gian thực hiện</label>
+              <%= f.datetime_field :occurred_at, value: Time.current.strftime("%Y-%m-%dT%H:%M"), class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none" %>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-500 mb-1">Hẹn lịch tương tác tiếp theo (Follow-up)</label>
+              <%= f.datetime_field :next_follow_up_at, class: "w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none" %>
+            </div>
+          </div>
+
+          <div class="pt-1 flex justify-end">
+            <%= f.submit "Lưu nhật ký tương tác", class: "px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition cursor-pointer text-xs shadow-md shadow-indigo-100" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 2. CRM Timeline of Activities -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+          <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="history" class="w-4 h-4 text-indigo-600"></i>
+            <span>Dòng thời gian chăm sóc & Tương tác B2B (<%= @activities.count %>)</span>
+          </h2>
+          <span class="text-[10px] text-slate-400">Mới nhất lên đầu</span>
+        </div>
+
+        <% if @activities.empty? %>
+          <div class="py-12 text-center text-slate-400 text-xs">
+            <i data-lucide="message-square-off" class="w-8 h-8 mx-auto text-slate-300 mb-2"></i>
+            Chưa có ghi chép tương tác nào với khách hàng này.
+          </div>
+        <% else %>
+          <div class="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+            <% @activities.each do |act| %>
+              <div class="relative group">
+                <!-- Dot icon -->
+                <div class="absolute -left-6 top-0 w-5 h-5 rounded-full bg-white border-2 border-indigo-600 flex items-center justify-center">
+                  <div class="w-2 h-2 rounded-full bg-indigo-600"></div>
+                </div>
+
+                <div class="bg-slate-50 hover:bg-slate-100/70 p-4 rounded-xl border border-slate-200 transition">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-indigo-100 text-indigo-800 border border-indigo-200">
+                        <%= act.type_info[:label] %>
+                      </span>
+                      <h3 class="text-xs font-bold text-slate-900"><%= act.title %></h3>
+                    </div>
+
+                    <div class="flex items-center space-x-2 text-[10px] text-slate-400">
+                      <span><%= act.occurred_at ? act.occurred_at.strftime("%d/%m/%Y lúc %H:%M") : '---' %></span>
+                      <span>•</span>
+                      <span class="font-bold text-slate-700"><%= act.user.name %></span>
+                      <span class="px-1.5 py-0.2 rounded border <%= act.user.role_badge_class %>"><%= act.user.role_label %></span>
+                    </div>
+                  </div>
+
+                  <% if act.content.present? %>
+                    <p class="text-xs text-slate-600 whitespace-pre-line mt-1"><%= act.content %></p>
+                  <% end %>
+
+                  <% if act.next_follow_up_at.present? %>
+                    <div class="mt-2 text-[11px] font-semibold text-indigo-600 bg-indigo-50/80 px-2.5 py-1 rounded-lg border border-indigo-100 inline-flex items-center">
+                      <i data-lucide="clock" class="w-3.5 h-3.5 mr-1"></i>
+                      Lịch hẹn tiếp theo: <%= act.next_follow_up_at.strftime("%d/%m/%Y %H:%M") %>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 3. Debt Transaction History Table -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+          <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="credit-card" class="w-4 h-4 text-indigo-600"></i>
+            <span>Lịch sử giao dịch công nợ & Thanh toán</span>
+          </h2>
+          <span class="text-[10px] text-slate-400"><%= @debt_transactions.count %> chứng từ</span>
+        </div>
+
+        <% if @debt_transactions.empty? %>
+          <p class="text-xs text-slate-400 text-center py-6">Chưa có giao dịch công nợ phát sinh.</p>
+        <% else %>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                <tr>
+                  <th class="py-2 px-3">Ngày</th>
+                  <th class="py-2 px-3">Loại chứng từ</th>
+                  <th class="py-2 px-3">Mã tham chiếu</th>
+                  <th class="py-2 px-3">Số tiền</th>
+                  <th class="py-2 px-3">Người ghi nhận</th>
+                  <th class="py-2 px-3">Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <% @debt_transactions.each do |tx| %>
+                  <tr class="hover:bg-slate-50 transition">
+                    <td class="py-2.5 px-3 font-mono text-slate-600"><%= tx.transaction_date.strftime("%d/%m/%Y") %></td>
+                    <td class="py-2.5 px-3 font-semibold">
+                      <% case tx.transaction_type %>
+                      <% when 'payment' %>
+                        <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Thu tiền</span>
+                      <% when 'invoice' %>
+                        <span class="text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Phát sinh nợ</span>
+                      <% else %>
+                        <span class="text-slate-700 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">Điều chỉnh</span>
+                      <% end %>
+                    </td>
+                    <td class="py-2.5 px-3 font-mono text-slate-500"><%= tx.reference_code || '---' %></td>
+                    <td class="py-2.5 px-3 font-bold <%= tx.transaction_type == 'payment' ? 'text-emerald-600' : 'text-slate-900' %>">
+                      <%= tx.transaction_type == 'payment' ? '-' : '+' %><%= format_vnd(tx.amount) %>
+                    </td>
+                    <td class="py-2.5 px-3 text-slate-600"><%= tx.user&.name %></td>
+                    <td class="py-2.5 px-3 text-slate-500"><%= tx.note %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

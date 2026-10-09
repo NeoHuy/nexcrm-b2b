@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: nexcrm_b2b_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crm_production
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d crm_production"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  crm-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexcrm_b2b_saas
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: production
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: crm_production
+      RAILS_SERVE_STATIC_FILES: "true"
+      RAILS_LOG_TO_STDOUT: "true"
+      SECRET_KEY_BASE: 7b6e41b9d4c28f9d8543f9a7e02b489d28e75c61304192b0c48e0259b1dc928c0499e74cf97a475d65f57a07010a30b42c4b8b693240742f9ef03df0f212720e
+    volumes:
+      - crm_storage:/rails/storage
+
+volumes:
+  pg_data:
+    driver: local
+  crm_storage:
+    driver: local
