@@ -16,7 +16,7 @@ module SaasB2bCrm
 
     config.time_zone = "Asia/Ho_Chi_Minh"
     config.i18n.default_locale = :vi
-    config.i18n.available_locales = [:vi, :en]
+    config.i18n.available_locales = [:vi, :en, :ja]
 
     # Don't generate system test files
     config.generators.system_tests = nil

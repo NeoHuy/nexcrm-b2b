@@ -3,6 +3,7 @@ import { customersApi } from '../services/api';
 import type { Customer, CustomerMeta } from '../types';
 import { formatVND } from '../utils/format';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   Building2, 
   Search, 
@@ -22,6 +23,7 @@ interface CustomersPageProps {
 
 export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }) => {
   const { currentUser } = useAuth();
+  const { t, translateIndustry, translateStatus, translateTier, translateRole } = useLanguage();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [stats, setStats] = useState({
     total_count: 0,
@@ -97,12 +99,12 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
   };
 
   const handleDelete = async (id: number, name: string) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa khách hàng "${name}"?`)) return;
+    if (!window.confirm(t('customers.confirm_delete', { name }))) return;
     try {
       await customersApi.delete(id);
       fetchCustomers();
     } catch (err: any) {
-      alert(err?.response?.data?.error || 'Xóa thất bại. Kiểm tra quyền của bạn!');
+      alert(err?.response?.data?.error || t('customers.err_delete'));
     }
   };
 
@@ -120,7 +122,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
       setShowCreateModal(false);
       fetchCustomers();
     } catch (err: any) {
-      setFormError(err?.response?.data?.errors?.join(', ') || 'Thêm khách hàng thất bại.');
+      setFormError(err?.response?.data?.errors?.join(', ') || t('customers.err_create'));
     } finally {
       setSubmitting(false);
     }
@@ -133,20 +135,21 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Building2 className="w-6 h-6 text-indigo-600" />
-            Quản lý Khách hàng Doanh nghiệp (B2B)
+            {t('customers.title')}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Tổng cộng {stats.total_count} đối tác • Tổng công nợ: <span className="font-semibold text-blue-700">{formatVND(stats.total_debt_amount)}</span>
+            {t('customers.subtitle_prefix', { count: stats.total_count })}{' '}
+            <span className="font-semibold text-blue-700">{formatVND(stats.total_debt_amount)}</span>
           </p>
         </div>
 
         {currentUser?.permissions?.can_create_customer && (
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm flex items-center justify-center gap-2 transition-colors self-start sm:self-auto"
+            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm flex items-center justify-center gap-2 transition-colors self-start sm:self-auto cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Thêm Khách hàng B2B
+            {t('customers.add_btn')}
           </button>
         )}
       </div>
@@ -161,7 +164,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm theo tên công ty, MST, người liên hệ..."
+              placeholder={t('customers.search_placeholder')}
               className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
@@ -172,9 +175,9 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
               onChange={(e) => setStatus(e.target.value)}
               className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
             >
-              <option value="">Tất cả trạng thái quan hệ</option>
+              <option value="">{t('customers.all_statuses')}</option>
               {meta && Object.entries(meta.statuses).map(([key, label]) => (
-                <option key={key} value={key}>{label}</option>
+                <option key={key} value={key}>{translateStatus(key, label)}</option>
               ))}
             </select>
           </div>
@@ -185,9 +188,9 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
               onChange={(e) => setIndustry(e.target.value)}
               className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
             >
-              <option value="">Tất cả ngành nghề</option>
+              <option value="">{t('customers.all_industries')}</option>
               {meta && meta.industries.map((ind) => (
-                <option key={ind} value={ind}>{ind}</option>
+                <option key={ind} value={ind}>{translateIndustry(ind)}</option>
               ))}
             </select>
           </div>
@@ -195,18 +198,18 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
 
         {/* Debt filter tabs */}
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-          <span className="text-xs font-semibold text-slate-500 mr-1">Bộ lọc công nợ:</span>
+          <span className="text-xs font-semibold text-slate-500 mr-1">{t('customers.debt_filter_label')}</span>
           {[
-            { key: '', label: 'Tất cả' },
-            { key: 'overdue', label: `🚨 Quá hạn (${stats.overdue_count})` },
-            { key: 'due_soon', label: '⚠️ Sắp đến hạn' },
-            { key: 'has_debt', label: `Có nợ (${stats.has_debt_count})` },
-            { key: 'settled', label: '✅ Đã tất toán' },
+            { key: '', label: t('customers.filter_all') },
+            { key: 'overdue', label: t('customers.filter_overdue', { count: stats.overdue_count }) },
+            { key: 'due_soon', label: t('customers.filter_due_soon') },
+            { key: 'has_debt', label: t('customers.filter_has_debt', { count: stats.has_debt_count }) },
+            { key: 'settled', label: t('customers.filter_settled') },
           ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setDebtFilter(tab.key)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                 debtFilter === tab.key
                   ? 'bg-indigo-600 text-white font-semibold'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -223,26 +226,26 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
         {loading ? (
           <div className="p-12 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-            <p className="text-xs text-slate-500 mt-2">Đang tải danh sách khách hàng...</p>
+            <p className="text-xs text-slate-500 mt-2">{t('customers.loading')}</p>
           </div>
         ) : customers.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <Building2 className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <p className="font-medium text-sm">Không tìm thấy khách hàng B2B nào phù hợp.</p>
-            <p className="text-xs text-slate-400 mt-1">Thử thay đổi từ khóa hoặc điều kiện bộ lọc.</p>
+            <p className="font-medium text-sm">{t('customers.empty_title')}</p>
+            <p className="text-xs text-slate-400 mt-1">{t('customers.empty_desc')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50/80 text-slate-500 text-xs uppercase font-semibold border-b border-slate-200">
                 <tr>
-                  <th className="py-3 px-4">Doanh nghiệp / MST</th>
-                  <th className="py-3 px-4">Đại diện (Decision Maker)</th>
-                  <th className="py-3 px-4">Phân loại & Hạng</th>
-                  <th className="py-3 px-4">Công nợ & Hạn mức</th>
-                  <th className="py-3 px-4">Tình trạng nợ</th>
-                  <th className="py-3 px-4">Phụ trách</th>
-                  <th className="py-3 px-4 text-right">Thao tác</th>
+                  <th className="py-3 px-4">{t('customers.col_company_tax')}</th>
+                  <th className="py-3 px-4">{t('customers.col_contact')}</th>
+                  <th className="py-3 px-4">{t('customers.col_status_tier')}</th>
+                  <th className="py-3 px-4">{t('customers.col_debt_limit')}</th>
+                  <th className="py-3 px-4">{t('customers.col_debt_status')}</th>
+                  <th className="py-3 px-4">{t('customers.col_assignee')}</th>
+                  <th className="py-3 px-4 text-right">{t('customers.col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -252,16 +255,16 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                     <td className="py-3.5 px-4">
                       <button
                         onClick={() => onSelectCustomer(c.id)}
-                        className="font-bold text-slate-900 hover:text-indigo-600 text-sm block text-left"
+                        className="font-bold text-slate-900 hover:text-indigo-600 text-sm block text-left cursor-pointer"
                       >
                         {c.company_name}
                       </button>
                       <div className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-                        <span>MST: {c.tax_code || 'Chưa có'}</span>
+                        <span>{t('dashboard.tax_code')}: {c.tax_code || t('customers.no_tax_code')}</span>
                         {c.industry && (
                           <>
                             <span>•</span>
-                            <span className="text-slate-500">{c.industry}</span>
+                            <span className="text-slate-500">{translateIndustry(c.industry)}</span>
                           </>
                         )}
                       </div>
@@ -270,7 +273,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                     {/* Contact */}
                     <td className="py-3.5 px-4">
                       <div className="font-medium text-slate-800 text-xs">
-                        {c.contact_name || 'Chưa có đại diện'}
+                        {c.contact_name || t('customers.no_contact')}
                       </div>
                       <div className="text-[11px] text-slate-400">{c.contact_title}</div>
                       <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
@@ -293,10 +296,10 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                     <td className="py-3.5 px-4">
                       <div className="flex flex-col gap-1 items-start">
                         <span className={`px-2 py-0.5 rounded text-[11px] border font-medium ${c.status_badge?.class || 'bg-slate-100 text-slate-700'}`}>
-                          {c.status_label}
+                          {translateStatus(c.status, c.status_label)}
                         </span>
                         <span className={`px-2 py-0.5 rounded text-[10px] border ${c.tier_badge?.class || 'bg-slate-100 text-slate-600'}`}>
-                          {c.tier_label}
+                          {translateTier(c.tier, c.tier_label)}
                         </span>
                       </div>
                     </td>
@@ -307,7 +310,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                         {formatVND(c.current_debt)}
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        Hạn mức: {formatVND(c.credit_limit)}
+                        {t('customers.credit_limit')}: {formatVND(c.credit_limit)}
                       </div>
                       {/* Credit Bar */}
                       <div className="w-28 bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
@@ -329,19 +332,19 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                       {c.overdue ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
                           <AlertTriangle className="w-3 h-3" />
-                          Trễ {c.days_overdue} ngày
+                          {t('dashboard.days_overdue', { days: c.days_overdue })}
                         </span>
                       ) : c.due_soon ? (
                         <span className="px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                          Sắp đến hạn
+                          {t('customers.due_soon')}
                         </span>
                       ) : c.current_debt > 0 ? (
                         <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                          Trong hạn
+                          {t('customers.in_term')}
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                          Đã tất toán
+                          {t('customers.settled')}
                         </span>
                       )}
                     </td>
@@ -351,10 +354,12 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                       {c.assigned_user ? (
                         <div>
                           <div className="font-semibold text-slate-800">{c.assigned_user.name}</div>
-                          <div className="text-[11px] text-slate-400">{c.assigned_user.role_label}</div>
+                          <div className="text-[11px] text-slate-400">
+                            {translateRole(undefined, c.assigned_user.department, c.assigned_user.role_label)}
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-slate-400 italic">Chưa giao</span>
+                        <span className="text-slate-400 italic">{t('customers.unassigned')}</span>
                       )}
                     </td>
 
@@ -363,16 +368,16 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => onSelectCustomer(c.id)}
-                          className="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold flex items-center gap-1 transition-colors"
+                          className="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
-                          <span>Chi tiết</span>
+                          <span>{t('customers.detail_btn')}</span>
                         </button>
                         {currentUser?.permissions?.can_delete_customer && (
                           <button
                             onClick={() => handleDelete(c.id, c.company_name)}
-                            className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-colors"
-                            title="Xóa khách hàng (Admin)"
+                            className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
+                            title={t('customers.delete_title')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -394,11 +399,11 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-indigo-600" />
-                Thêm mới Khách hàng Doanh nghiệp B2B
+                {t('customers.modal_title')}
               </h2>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -414,34 +419,34 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Tên doanh nghiệp *
+                    {t('customers.form_company_name')}
                   </label>
                   <input
                     type="text"
                     required
                     value={formData.company_name}
                     onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                    placeholder="VD: Tập đoàn Công nghệ VinaTech"
+                    placeholder={t('customers.form_company_placeholder')}
                     className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Mã số thuế (MST)
+                    {t('customers.form_tax_code')}
                   </label>
                   <input
                     type="text"
                     value={formData.tax_code}
                     onChange={(e) => setFormData({ ...formData, tax_code: e.target.value })}
-                    placeholder="VD: 0102345678"
+                    placeholder={t('customers.form_tax_placeholder')}
                     className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Ngành nghề kinh doanh
+                    {t('customers.form_industry')}
                   </label>
                   <select
                     value={formData.industry}
@@ -449,14 +454,14 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                     className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                   >
                     {meta?.industries.map((ind) => (
-                      <option key={ind} value={ind}>{ind}</option>
+                      <option key={ind} value={ind}>{translateIndustry(ind)}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Trạng thái quan hệ B2B
+                    {t('customers.form_status')}
                   </label>
                   <select
                     value={formData.status}
@@ -464,14 +469,14 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                     className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                   >
                     {meta && Object.entries(meta.statuses).map(([key, label]) => (
-                      <option key={key} value={key}>{label}</option>
+                      <option key={key} value={key}>{translateStatus(key, label)}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Phân hạng đối tác
+                    {t('customers.form_tier')}
                   </label>
                   <select
                     value={formData.tier}
@@ -479,23 +484,25 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                     className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                   >
                     {meta && Object.entries(meta.tiers).map(([key, label]) => (
-                      <option key={key} value={key}>{label}</option>
+                      <option key={key} value={key}>{translateTier(key, label)}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Người phụ trách chính
+                    {t('customers.form_assignee')}
                   </label>
                   <select
                     value={formData.assigned_user_id}
                     onChange={(e) => setFormData({ ...formData, assigned_user_id: e.target.value })}
                     className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                   >
-                    <option value="">Chưa phân công</option>
+                    <option value="">{t('dashboard.unassigned')}</option>
                     {meta?.users.map((u) => (
-                      <option key={u.id} value={u.id}>{u.name} ({u.role_label})</option>
+                      <option key={u.id} value={u.id}>
+                        {u.name} ({translateRole(undefined, u.department, u.role_label)})
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -504,7 +511,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
               {/* Contact details */}
               <div className="pt-2 border-t border-slate-100">
                 <h4 className="text-xs font-bold uppercase text-slate-500 mb-2">
-                  Đại diện pháp nhân (Decision Maker)
+                  {t('customers.form_contact_section')}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -512,7 +519,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                       type="text"
                       value={formData.contact_name}
                       onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
-                      placeholder="Họ và tên người đại diện"
+                      placeholder={t('customers.form_contact_name')}
                       className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
@@ -521,7 +528,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                       type="text"
                       value={formData.contact_title}
                       onChange={(e) => setFormData({ ...formData, contact_title: e.target.value })}
-                      placeholder="Chức vụ (VD: Giám đốc, Kế toán trưởng)"
+                      placeholder={t('customers.form_contact_title')}
                       className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
@@ -530,7 +537,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                       type="tel"
                       value={formData.contact_phone}
                       onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
-                      placeholder="Số điện thoại liên hệ"
+                      placeholder={t('customers.form_contact_phone')}
                       className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
@@ -539,7 +546,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                       type="email"
                       value={formData.contact_email}
                       onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
-                      placeholder="Email làm việc"
+                      placeholder={t('customers.form_contact_email')}
                       className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
@@ -550,11 +557,11 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
               <div className="pt-2 border-t border-slate-100">
                 <h4 className="text-xs font-bold uppercase text-slate-500 mb-2 flex items-center gap-1.5">
                   <CreditCard className="w-3.5 h-3.5 text-slate-400" />
-                  Hạn mức tín dụng & Công nợ khởi tạo
+                  {t('customers.form_finance_section')}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] text-slate-600 mb-1">Hạn mức công nợ cho phép (VNĐ)</label>
+                    <label className="block text-[11px] text-slate-600 mb-1">{t('customers.form_credit_limit')}</label>
                     <input
                       type="number"
                       value={formData.credit_limit}
@@ -563,7 +570,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-slate-600 mb-1">Công nợ ban đầu (VNĐ)</label>
+                    <label className="block text-[11px] text-slate-600 mb-1">{t('customers.form_initial_debt')}</label>
                     <input
                       type="number"
                       value={formData.current_debt}
@@ -578,16 +585,16 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onSelectCustomer }
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs sm:text-sm font-semibold transition-colors"
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
                 >
-                  Hủy bỏ
+                  {t('customers.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-colors disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  {submitting ? 'Đang lưu...' : 'Lưu khách hàng'}
+                  {submitting ? t('customers.saving') : t('customers.save')}
                 </button>
               </div>
             </form>

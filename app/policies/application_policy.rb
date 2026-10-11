@@ -6,16 +6,23 @@ class ApplicationPolicy
     @record = record
   end
 
+  def admin?
+    user&.admin? == true
+  end
+
   def index?
-    true
+    return true if admin?
+    false
   end
 
   def show?
-    true
+    return true if admin?
+    false
   end
 
   def create?
-    user.admin?
+    return true if admin?
+    false
   end
 
   def new?
@@ -23,7 +30,8 @@ class ApplicationPolicy
   end
 
   def update?
-    user.admin?
+    return true if admin?
+    false
   end
 
   def edit?
@@ -31,6 +39,21 @@ class ApplicationPolicy
   end
 
   def destroy?
-    user.admin?
+    return true if admin?
+    false
+  end
+
+  class Scope
+    attr_reader :user, :scope
+
+    def initialize(user, scope)
+      @user = user
+      @scope = scope
+    end
+
+    def resolve
+      return scope.all if user&.admin?
+      scope.none
+    end
   end
 end

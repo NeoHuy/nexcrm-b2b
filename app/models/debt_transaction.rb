@@ -14,6 +14,31 @@ class DebtTransaction < ApplicationRecord
 
   after_create :update_customer_debt
 
+  def localized_type_label
+    case transaction_type
+    when "invoice"
+      case I18n.locale
+      when :en then "New Invoice (Increase Debt)"
+      when :ja then "請求書発行（売掛金計上）"
+      else "Phát sinh công nợ (Hóa đơn mới)"
+      end
+    when "payment"
+      case I18n.locale
+      when :en then "Payment Received (Reduce Debt)"
+      when :ja then "入金確認（売掛金消込）"
+      else "Thanh toán (Thu tiền)"
+      end
+    when "adjustment"
+      case I18n.locale
+      when :en then "Balance Adjustment"
+      when :ja then "残高調整"
+      else "Điều chỉnh công nợ"
+      end
+    else
+      transaction_type.to_s.humanize
+    end
+  end
+
   private
 
   def update_customer_debt

@@ -1,10 +1,39 @@
+export type PolicyCode =
+  | 'admin_all'
+  | 'no_access'
+  | 'sales_policy'
+  | 'cs_debt_policy'
+  | 'marketing_policy'
+  | 'full_user_policy'
+  | 'readonly_policy'
+  | 'custom';
+
+export interface PolicyPermissions {
+  customer_view: boolean;
+  customer_create: boolean;
+  customer_update: boolean;
+  customer_delete: boolean;
+  debt_view: boolean;
+  debt_create: boolean;
+  activity_create: boolean;
+  activity_delete: boolean;
+  own_customers_only: boolean;
+}
+
 export interface UserPermissions {
+  has_any_permission?: boolean;
+  can_view_customer?: boolean;
   can_create_customer: boolean;
   can_edit_customer: boolean;
   can_delete_customer: boolean;
+  can_view_debt?: boolean;
   can_create_debt: boolean;
+  can_create_activity?: boolean;
+  can_delete_activity?: boolean;
+  own_customers_only?: boolean;
   can_manage_users?: boolean;
   is_admin: boolean;
+  is_user?: boolean;
   is_sales: boolean;
   is_cs: boolean;
   is_marketing: boolean;
@@ -21,12 +50,20 @@ export interface User {
   phone?: string;
   avatar_color?: string;
   role_label: string;
+  policy_code?: PolicyCode;
+  policy_label?: string;
   badge_class: string;
+  policy_badge_class?: string;
+  policy_permissions?: PolicyPermissions;
   permissions?: UserPermissions;
 }
 
 export interface ManagedUser extends User {
-  role_preset: 'admin' | 'sales' | 'cs' | 'marketing';
+  role_preset: 'admin' | 'sales' | 'cs' | 'marketing' | PolicyCode;
+  policy_code: PolicyCode;
+  policy_label: string;
+  policy_badge_class: string;
+  policy_permissions: PolicyPermissions;
   customers_count: number;
   total_managed_debt: number;
   total_managed_revenue: number;
@@ -40,6 +77,7 @@ export interface ManagedUser extends User {
 export interface UserStats {
   total_users: number;
   admin_count: number;
+  user_count?: number;
   sales_count: number;
   cs_count: number;
   marketing_count: number;
@@ -49,10 +87,13 @@ export interface DemoUser {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: 'admin' | 'user';
   department?: string;
   role_label: string;
+  policy_code?: string;
+  policy_label?: string;
   badge_class: string;
+  policy_badge_class?: string;
 }
 
 export interface Customer {
@@ -81,6 +122,8 @@ export interface Customer {
   debt_status: 'settled' | 'overdue' | 'due_soon' | 'in_term';
   debt_badge?: { label: string; class: string };
   credit_utilization: number;
+  can_update?: boolean;
+  can_destroy?: boolean;
   website?: string;
   address?: string;
   city?: string;
@@ -90,8 +133,10 @@ export interface Customer {
   assigned_user?: {
     id: number;
     name: string;
+    role?: 'admin' | 'user';
     department?: string;
     role_label?: string;
+    policy_label?: string;
   };
   created_at: string;
   updated_at: string;
@@ -170,5 +215,5 @@ export interface CustomerMeta {
   tiers: Record<string, string>;
   industries: string[];
   lead_sources: string[];
-  users: Array<{ id: number; name: string; department?: string; role_label: string }>;
+  users: Array<{ id: number; name: string; role?: string; department?: string; role_label: string; policy_label?: string }>;
 }

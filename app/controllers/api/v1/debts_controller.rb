@@ -2,9 +2,12 @@ module Api
   module V1
     class DebtsController < BaseController
       def index
+        authorize :debt, :index?
+
         filter = params[:filter] || "all"
 
-        customers = Customer.with_debt.includes(:assigned_user)
+        base_scope = DebtPolicy::Scope.new(current_user, Customer).resolve
+        customers = base_scope.with_debt.includes(:assigned_user)
 
         case filter
         when "overdue"
@@ -15,10 +18,10 @@ module Api
 
         customers = customers.order(current_debt: :desc)
 
-        total_debt = Customer.sum(:current_debt).to_f
-        overdue_debt = Customer.overdue_debts.sum(:current_debt).to_f
-        due_soon_debt = Customer.due_soon_debts.sum(:current_debt).to_f
-        overdue_count = Customer.overdue_debts.count
+        total_debt = base_scope.sum(:current_debt).to_f
+        overdue_debt = base_scope.overdue_debts.sum(:current_debt).to_f
+        due_soon_debt = base_scope.due_soon_debts.sum(:current_debt).to_f
+        overdue_count = base_scope.overdue_debts.count
 
         serialized_customers = customers.map do |c|
           {
@@ -39,8 +42,10 @@ module Api
             assigned_user: c.assigned_user ? {
               id: c.assigned_user.id,
               name: c.assigned_user.name,
+              role: c.assigned_user.role,
               department: c.assigned_user.department,
-              role_label: c.assigned_user.role_label
+              role_label: c.assigned_user.role_label,
+              policy_label: c.assigned_user.policy_label
             } : nil
           }
         end

@@ -11,7 +11,11 @@ module Api
 
         if activity.save
           render json: {
-            message: "Đã lưu nhật ký tương tác: #{activity.title}",
+            message: localized_msg(
+              vi: "Đã lưu nhật ký tương tác: #{activity.title}",
+              en: "Saved activity log: #{activity.title}",
+              ja: "対応履歴を保存しました: #{activity.title}"
+            ),
             activity: {
               id: activity.id,
               title: activity.title,
@@ -36,7 +40,13 @@ module Api
         authorize activity
 
         activity.destroy
-        render json: { message: "Đã xóa nhật ký tương tác." }
+        render json: {
+          message: localized_msg(
+            vi: "Đã xóa nhật ký tương tác.",
+            en: "Deleted activity log.",
+            ja: "対応履歴を削除しました。"
+          )
+        }
       end
 
       private

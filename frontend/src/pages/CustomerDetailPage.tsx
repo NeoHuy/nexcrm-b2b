@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { customersApi } from '../services/api';
 import type { Customer, Activity, DebtTransaction } from '../types';
 import { formatVND, formatDate, formatDateTime } from '../utils/format';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   ArrowLeft, 
   Phone, 
@@ -26,6 +27,16 @@ interface CustomerDetailPageProps {
 }
 
 export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customerId, onBack }) => {
+  const {
+    t,
+    translateStatus,
+    translateTier,
+    translateIndustry,
+    translateLeadSource,
+    translateRole,
+    translateActivityType,
+    translateTransactionType,
+  } = useLanguage();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [debtTransactions, setDebtTransactions] = useState<DebtTransaction[]>([]);
@@ -87,26 +98,26 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
       });
       fetchDetail();
     } catch (err: any) {
-      alert(err?.response?.data?.error || 'Không thể lưu hoạt động.');
+      alert(err?.response?.data?.error || t('detail.err_save_activity'));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteActivity = async (actId: number) => {
-    if (!window.confirm('Bạn có chắc muốn xóa hoạt động này?')) return;
+    if (!window.confirm(t('detail.confirm_delete_activity'))) return;
     try {
       await customersApi.deleteActivity(customerId, actId);
       fetchDetail();
     } catch (err: any) {
-      alert(err?.response?.data?.error || 'Xóa thất bại.');
+      alert(err?.response?.data?.error || t('customers.err_delete'));
     }
   };
 
   const handleAddDebtTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!debtForm.amount || Number(debtForm.amount) <= 0) {
-      alert('Vui lòng nhập số tiền hợp lệ.');
+      alert(t('detail.err_invalid_amount'));
       return;
     }
     setSubmitting(true);
@@ -125,7 +136,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
       });
       fetchDetail();
     } catch (err: any) {
-      alert(err?.response?.data?.error || err?.response?.data?.errors?.join(', ') || 'Ghi nhận thất bại.');
+      alert(err?.response?.data?.error || err?.response?.data?.errors?.join(', ') || t('detail.err_save_tx'));
     } finally {
       setSubmitting(false);
     }
@@ -156,30 +167,30 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs transition-colors"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Quay lại danh sách</span>
+          <span>{t('detail.back')}</span>
         </button>
 
         <div className="flex items-center gap-2">
           {permissions.can_create_debt_transaction && (
             <button
               onClick={() => setShowDebtModal(true)}
-              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Receipt className="w-4 h-4" />
-              <span>Ghi nhận Thu tiền / Hóa đơn</span>
+              <span>{t('detail.add_debt_btn')}</span>
             </button>
           )}
 
           {permissions.can_create_activity && (
             <button
               onClick={() => setShowActivityModal(true)}
-              className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>Thêm Nhật ký chăm sóc</span>
+              <span>{t('detail.add_activity_btn')}</span>
             </button>
           )}
         </div>
@@ -191,14 +202,14 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${customer.status_badge?.class || 'bg-slate-100 text-slate-800'}`}>
-                {customer.status_label}
+                {translateStatus(customer.status, customer.status_label)}
               </span>
               <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${customer.tier_badge?.class || 'bg-slate-100 text-slate-700'}`}>
-                {customer.tier_label}
+                {translateTier(customer.tier, customer.tier_label)}
               </span>
               {customer.industry && (
                 <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-medium">
-                  {customer.industry}
+                  {translateIndustry(customer.industry)}
                 </span>
               )}
             </div>
@@ -206,7 +217,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
               {customer.company_name}
             </h1>
             <div className="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-3">
-              <span>Mã số thuế: <strong className="text-slate-700">{customer.tax_code || 'Chưa có'}</strong></span>
+              <span>{t('detail.tax_code')} <strong className="text-slate-700">{customer.tax_code || t('customers.no_tax_code')}</strong></span>
               {customer.website && (
                 <a 
                   href={customer.website.startsWith('http') ? customer.website : `https://${customer.website}`} 
@@ -228,12 +239,14 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
           </div>
 
           <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/80 min-w-[240px]">
-            <div className="text-xs text-slate-500 font-medium">Đầu mối phụ trách (AM)</div>
+            <div className="text-xs text-slate-500 font-medium">{t('detail.am_label')}</div>
             <div className="font-bold text-slate-900 text-sm mt-0.5">
-              {customer.assigned_user?.name || 'Chưa gán nhân sự'}
+              {customer.assigned_user?.name || t('detail.no_am')}
             </div>
             <div className="text-xs text-indigo-600 mt-0.5">
-              {customer.assigned_user?.role_label || '-'}
+              {customer.assigned_user
+                ? translateRole(undefined, customer.assigned_user.department, customer.assigned_user.role_label)
+                : '-'}
             </div>
           </div>
         </div>
@@ -246,41 +259,41 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-indigo-600" />
-              Tình hình Tài chính & Công nợ B2B
+              {t('detail.finance_title')}
             </h3>
             {customer.overdue ? (
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
                 <AlertTriangle className="w-3.5 h-3.5" />
-                Quá hạn {customer.days_overdue} ngày
+                {t('detail.overdue_days', { days: customer.days_overdue })}
               </span>
             ) : customer.due_soon ? (
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                Sắp đến hạn thanh toán
+                {t('detail.due_soon_badge')}
               </span>
             ) : (
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
-                Công nợ trong hạn
+                {t('detail.in_term_badge')}
               </span>
             )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60">
-              <span className="text-xs text-slate-500 font-medium block">Công nợ hiện tại</span>
+              <span className="text-xs text-slate-500 font-medium block">{t('detail.current_debt')}</span>
               <span className="text-xl font-black text-rose-700 mt-1 block">
                 {formatVND(customer.current_debt)}
               </span>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60">
-              <span className="text-xs text-slate-500 font-medium block">Hạn mức tín dụng</span>
+              <span className="text-xs text-slate-500 font-medium block">{t('detail.credit_limit')}</span>
               <span className="text-xl font-bold text-slate-900 mt-1 block">
                 {formatVND(customer.credit_limit)}
               </span>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60">
-              <span className="text-xs text-slate-500 font-medium block">Hạn thanh toán</span>
+              <span className="text-xs text-slate-500 font-medium block">{t('detail.payment_due_date')}</span>
               <span className="text-sm font-bold text-slate-800 mt-2 block">
                 {formatDate(customer.payment_due_date)}
               </span>
@@ -290,7 +303,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
           {/* Credit Bar */}
           <div>
             <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
-              <span>Tỷ lệ sử dụng hạn mức tín dụng</span>
+              <span>{t('detail.credit_utilization')}</span>
               <span>{customer.credit_utilization}%</span>
             </div>
             <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
@@ -312,36 +325,36 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
         <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
           <h3 className="font-bold text-slate-900 text-base pb-3 border-b border-slate-100 flex items-center gap-2">
             <Users className="w-5 h-5 text-indigo-600" />
-            Đại diện pháp nhân (Decision Maker)
+            {t('detail.dm_title')}
           </h3>
 
           <div className="space-y-3">
             <div>
-              <span className="text-xs text-slate-400">Họ và tên:</span>
-              <div className="text-sm font-bold text-slate-900">{customer.contact_name || 'Chưa cập nhật'}</div>
-              <div className="text-xs text-indigo-600 font-medium">{customer.contact_title || 'Chưa có chức vụ'}</div>
+              <span className="text-xs text-slate-400">{t('detail.dm_name')}</span>
+              <div className="text-sm font-bold text-slate-900">{customer.contact_name || t('dashboard.not_updated')}</div>
+              <div className="text-xs text-indigo-600 font-medium">{customer.contact_title || t('detail.dm_no_title')}</div>
             </div>
 
             <div className="pt-2 border-t border-slate-100">
-              <span className="text-xs text-slate-400">Số điện thoại liên hệ:</span>
+              <span className="text-xs text-slate-400">{t('detail.dm_phone')}</span>
               <div className="text-sm font-semibold text-slate-800 flex items-center gap-2 mt-0.5">
                 <Phone className="w-3.5 h-3.5 text-slate-400" />
-                {customer.contact_phone || 'Chưa có SĐT'}
+                {customer.contact_phone || t('dashboard.no_phone')}
               </div>
             </div>
 
             <div className="pt-2 border-t border-slate-100">
-              <span className="text-xs text-slate-400">Email công việc:</span>
+              <span className="text-xs text-slate-400">{t('detail.dm_email')}</span>
               <div className="text-sm font-semibold text-slate-800 flex items-center gap-2 mt-0.5">
                 <Mail className="w-3.5 h-3.5 text-slate-400" />
-                {customer.contact_email || 'Chưa có Email'}
+                {customer.contact_email || t('detail.dm_no_email')}
               </div>
             </div>
 
             {customer.lead_source && (
               <div className="pt-2 border-t border-slate-100">
-                <span className="text-xs text-slate-400">Nguồn Lead:</span>
-                <div className="text-xs font-medium text-slate-700 mt-0.5">{customer.lead_source}</div>
+                <span className="text-xs text-slate-400">{t('detail.dm_lead_source')}</span>
+                <div className="text-xs font-medium text-slate-700 mt-0.5">{translateLeadSource(customer.lead_source)}</div>
               </div>
             )}
           </div>
@@ -355,15 +368,15 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
           <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
             <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
               <FileText className="w-4 h-4 text-indigo-600" />
-              Nhật ký chăm sóc ({activities.length})
+              {t('detail.activities_title', { count: activities.length })}
             </h3>
             {permissions.can_create_activity && (
               <button
                 onClick={() => setShowActivityModal(true)}
-                className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1"
+                className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                Thêm tương tác
+                {t('detail.add_interaction')}
               </button>
             )}
           </div>
@@ -371,7 +384,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
           <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
             {activities.length === 0 ? (
               <div className="py-8 text-center text-slate-400 text-xs">
-                Chưa có nhật ký trao đổi nào được ghi lại.
+                {t('detail.no_activities')}
               </div>
             ) : (
               activities.map((act) => (
@@ -388,11 +401,11 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
                         </div>
                       </div>
                     </div>
-                    {permissions.can_create_activity && (
+                    {(permissions.can_delete_activity ?? permissions.can_create_activity) && (
                       <button
                         onClick={() => handleDeleteActivity(act.id)}
-                        className="text-slate-300 hover:text-rose-600 p-1"
-                        title="Xóa"
+                        className="text-slate-300 hover:text-rose-600 p-1 cursor-pointer"
+                        title={t('detail.delete')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -405,7 +418,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
                   )}
                   {act.next_follow_up_at && (
                     <div className="mt-2 pl-9 text-[11px] text-indigo-600 font-medium flex items-center gap-1">
-                      <span>Lịch hẹn tiếp theo:</span>
+                      <span>{t('detail.next_follow_up')}</span>
                       <strong>{formatDateTime(act.next_follow_up_at)}</strong>
                     </div>
                   )}
@@ -420,15 +433,15 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
           <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
             <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
               <Receipt className="w-4 h-4 text-emerald-600" />
-              Sổ phụ giao dịch công nợ ({debtTransactions.length})
+              {t('detail.ledger_title', { count: debtTransactions.length })}
             </h3>
             {permissions.can_create_debt_transaction && (
               <button
                 onClick={() => setShowDebtModal(true)}
-                className="text-xs text-emerald-600 font-semibold hover:underline flex items-center gap-1"
+                className="text-xs text-emerald-600 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                Ghi nhận GD
+                {t('detail.record_tx')}
               </button>
             )}
           </div>
@@ -436,7 +449,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
             {debtTransactions.length === 0 ? (
               <div className="py-8 text-center text-slate-400 text-xs">
-                Chưa có phát sinh hóa đơn hoặc thanh toán nào.
+                {t('detail.no_transactions')}
               </div>
             ) : (
               debtTransactions.map((tx) => (
@@ -450,14 +463,14 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
                           ? 'bg-blue-100 text-blue-800'
                           : 'bg-purple-100 text-purple-800'
                       }`}>
-                        {tx.transaction_type_label}
+                        {translateTransactionType(tx.transaction_type, tx.transaction_type_label)}
                       </span>
                       {tx.reference_code && (
                         <span className="text-xs text-slate-500 font-mono">#{tx.reference_code}</span>
                       )}
                     </div>
                     <div className="text-[11px] text-slate-400 mt-1">
-                      {formatDate(tx.transaction_date)} • Thực hiện bởi {tx.user?.name || 'Hệ thống'}
+                      {formatDate(tx.transaction_date)} • {t('detail.performed_by', { name: tx.user?.name || t('detail.system') })}
                     </div>
                     {tx.note && (
                       <p className="text-xs text-slate-500 mt-1 italic">{tx.note}</p>
@@ -482,35 +495,34 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="font-bold text-slate-900 text-base">Ghi nhận nhật ký chăm sóc</h3>
-              <button onClick={() => setShowActivityModal(false)} className="text-slate-400 hover:text-slate-600">
+              <h3 className="font-bold text-slate-900 text-base">{t('detail.activity_modal_title')}</h3>
+              <button onClick={() => setShowActivityModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleAddActivity} className="mt-4 space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Loại tương tác</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t('detail.activity_type')}</label>
                 <select
                   value={activityForm.activity_type}
                   onChange={(e) => setActivityForm({ ...activityForm, activity_type: e.target.value })}
                   className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                 >
-                  <option value="call">Cuộc gọi trao đổi</option>
-                  <option value="meeting">Cuộc họp / Demo giải pháp</option>
-                  <option value="email">Email trao đổi</option>
-                  <option value="support">Hỗ trợ kỹ thuật / CS</option>
-                  <option value="debt_reminder">Nhắc nhở công nợ</option>
-                  <option value="note">Ghi chú nội bộ</option>
+                  {['call', 'meeting', 'email', 'support', 'debt_reminder', 'note'].map((type) => (
+                    <option key={type} value={type}>
+                      {translateActivityType(type)}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Tiêu đề tương tác *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t('detail.activity_title_label')}</label>
                 <input
                   type="text"
                   required
-                  placeholder="VD: Họp demo tính năng với Kế toán trưởng"
+                  placeholder={t('detail.activity_title_placeholder')}
                   value={activityForm.title}
                   onChange={(e) => setActivityForm({ ...activityForm, title: e.target.value })}
                   className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -518,10 +530,10 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Nội dung chi tiết</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t('detail.activity_content_label')}</label>
                 <textarea
                   rows={3}
-                  placeholder="Nội dung thảo luận, phản hồi của khách hàng..."
+                  placeholder={t('detail.activity_content_placeholder')}
                   value={activityForm.content}
                   onChange={(e) => setActivityForm({ ...activityForm, content: e.target.value })}
                   className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -529,7 +541,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Lịch hẹn tiếp theo (Next Follow-up)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t('detail.activity_followup_label')}</label>
                 <input
                   type="datetime-local"
                   value={activityForm.next_follow_up_at}
@@ -542,16 +554,16 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
                 <button
                   type="button"
                   onClick={() => setShowActivityModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs sm:text-sm font-semibold"
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs sm:text-sm font-semibold cursor-pointer"
                 >
-                  Hủy bỏ
+                  {t('customers.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm cursor-pointer"
                 >
-                  {submitting ? 'Đang lưu...' : 'Lưu tương tác'}
+                  {submitting ? t('customers.saving') : t('detail.save_activity')}
                 </button>
               </div>
             </form>
@@ -566,33 +578,35 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
                 <Receipt className="w-5 h-5 text-emerald-600" />
-                Ghi nhận Giao dịch Công nợ B2B
+                {t('detail.debt_modal_title')}
               </h3>
-              <button onClick={() => setShowDebtModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowDebtModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleAddDebtTransaction} className="mt-4 space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Loại giao dịch</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t('detail.tx_type_label')}</label>
                 <select
                   value={debtForm.transaction_type}
                   onChange={(e) => setDebtForm({ ...debtForm, transaction_type: e.target.value })}
                   className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                 >
-                  <option value="payment">Thanh toán (Thu tiền - Giảm công nợ)</option>
-                  <option value="invoice">Phát sinh công nợ (Hóa đơn mới - Tăng nợ)</option>
-                  <option value="adjustment">Điều chỉnh số dư công nợ</option>
+                  {['payment', 'invoice', 'adjustment'].map((type) => (
+                    <option key={type} value={type}>
+                      {translateTransactionType(type)}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Số tiền (VNĐ) *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t('detail.tx_amount_label')}</label>
                 <input
                   type="number"
                   required
-                  placeholder="VD: 25000000"
+                  placeholder={t('detail.tx_amount_placeholder')}
                   value={debtForm.amount}
                   onChange={(e) => setDebtForm({ ...debtForm, amount: e.target.value })}
                   className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -601,7 +615,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Ngày thực hiện</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{t('detail.tx_date_label')}</label>
                   <input
                     type="date"
                     value={debtForm.transaction_date}
@@ -610,10 +624,10 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Mã hóa đơn / Tham chiếu</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{t('detail.tx_ref_label')}</label>
                   <input
                     type="text"
-                    placeholder="VD: HD-2026-001"
+                    placeholder={t('detail.tx_ref_placeholder')}
                     value={debtForm.reference_code}
                     onChange={(e) => setDebtForm({ ...debtForm, reference_code: e.target.value })}
                     className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -622,10 +636,10 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Ghi chú giao dịch</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t('detail.tx_note_label')}</label>
                 <input
                   type="text"
-                  placeholder="Ghi chú nội dung chuyển khoản hoặc số ủy nhiệm chi..."
+                  placeholder={t('detail.tx_note_placeholder')}
                   value={debtForm.note}
                   onChange={(e) => setDebtForm({ ...debtForm, note: e.target.value })}
                   className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -636,16 +650,16 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({ customer
                 <button
                   type="button"
                   onClick={() => setShowDebtModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs sm:text-sm font-semibold"
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs sm:text-sm font-semibold cursor-pointer"
                 >
-                  Hủy bỏ
+                  {t('customers.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-sm"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-sm cursor-pointer"
                 >
-                  {submitting ? 'Đang lưu...' : 'Xác nhận giao dịch'}
+                  {submitting ? t('customers.saving') : t('detail.confirm_tx')}
                 </button>
               </div>
             </form>

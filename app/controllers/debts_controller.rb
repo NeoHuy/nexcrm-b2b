@@ -1,8 +1,11 @@
 class DebtsController < ApplicationController
   def index
+    authorize :debt, :index?
+
     @filter = params[:filter] || "all"
-    
-    customers = Customer.with_debt.includes(:assigned_user)
+
+    base_scope = DebtPolicy::Scope.new(current_user, Customer).resolve
+    customers = base_scope.with_debt.includes(:assigned_user)
 
     case @filter
     when "overdue"
@@ -12,10 +15,10 @@ class DebtsController < ApplicationController
     end
 
     @customers = customers.order(current_debt: :desc)
-    
-    @total_debt = Customer.sum(:current_debt)
-    @overdue_debt = Customer.overdue_debts.sum(:current_debt)
-    @due_soon_debt = Customer.due_soon_debts.sum(:current_debt)
-    @overdue_count = Customer.overdue_debts.count
+
+    @total_debt = base_scope.sum(:current_debt)
+    @overdue_debt = base_scope.overdue_debts.sum(:current_debt)
+    @due_soon_debt = base_scope.due_soon_debts.sum(:current_debt)
+    @overdue_count = base_scope.overdue_debts.count
   end
 end

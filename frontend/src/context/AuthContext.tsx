@@ -6,7 +6,7 @@ interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  demoLogin: (role: string) => Promise<void>;
+  demoLogin: (roleOrPayload: string | { user_id?: number; role?: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
 }
@@ -41,8 +41,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(data.user);
   };
 
-  const demoLogin = async (role: string) => {
-    const data = await authApi.demoLogin(role);
+  const demoLogin = async (roleOrPayload: string | { user_id?: number; role?: string }) => {
+    const data = await authApi.demoLogin(roleOrPayload);
     setCurrentUser(data.user);
   };
 

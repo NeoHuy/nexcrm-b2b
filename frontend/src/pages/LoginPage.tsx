@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Building2, ShieldCheck, Briefcase, Headphones, Megaphone, ArrowRight, Lock, Mail, AlertCircle } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { Building2, ShieldCheck, UserCheck, ArrowRight, Lock, Mail, AlertCircle } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const { login, demoLogin } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('admin@crm.saas');
   const [password, setPassword] = useState('password123');
   const [loading, setLoading] = useState(false);
@@ -16,7 +19,7 @@ export const LoginPage: React.FC = () => {
     try {
       await login(email, password);
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Email hoặc mật khẩu không chính xác.');
+      setError(err?.response?.data?.error || t('login.err_invalid'));
     } finally {
       setLoading(false);
     }
@@ -28,21 +31,26 @@ export const LoginPage: React.FC = () => {
     try {
       await demoLogin(role);
     } catch (err: any) {
-      setError(err?.response?.data?.error || 'Đăng nhập demo thất bại.');
+      setError(err?.response?.data?.error || t('login.err_demo'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+      {/* Top-right Language Switcher */}
+      <div className="absolute top-5 right-5 z-20">
+        <LanguageSwitcher variant="dark" />
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div className="mx-auto w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-xl shadow-indigo-600/30 mb-4">
           <Building2 className="w-8 h-8" />
         </div>
         <h1 className="text-3xl font-extrabold text-white tracking-tight">NexCRM B2B</h1>
         <p className="mt-2 text-sm text-slate-400">
-          Nền tảng Quản lý Khách hàng Doanh nghiệp & Theo dõi Công nợ B2B
+          {t('login.subtitle')}
         </p>
       </div>
 
@@ -59,58 +67,86 @@ export const LoginPage: React.FC = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                ⚡ Đăng nhập nhanh 1-Click (Kiểm tra Phân quyền)
+                {t('login.demo_heading')}
               </h3>
-              <span className="text-[11px] text-indigo-600 font-medium">Chọn một vai trò:</span>
+              <span className="text-[11px] text-indigo-600 font-medium">{t('login.select_role')}</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => handleDemoClick('admin')}
-                className="p-3 text-left rounded-xl border border-rose-100 bg-rose-50/50 hover:bg-rose-50 hover:border-rose-300 transition-all group"
+                className="p-3 text-left rounded-xl border border-rose-200 bg-rose-50/60 hover:bg-rose-50 hover:border-rose-300 transition-all group cursor-pointer"
               >
-                <div className="flex items-center gap-2 font-bold text-sm text-rose-700">
-                  <ShieldCheck className="w-4 h-4 text-rose-600" />
-                  <span>Admin Quản trị</span>
+                <div className="flex items-center justify-between font-bold text-sm text-rose-700">
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-rose-600" />
+                    {t('login.admin_title')}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-600 text-white uppercase">
+                    All Access
+                  </span>
                 </div>
-                <p className="text-xs text-rose-600/80 mt-1">Toàn quyền: Tạo, sửa, xóa KH, duyệt công nợ</p>
+                <p className="text-xs text-rose-700/80 mt-1">
+                  {t('login.admin_desc')}
+                </p>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleDemoClick('sales')}
-                className="p-3 text-left rounded-xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all group"
+                className="p-3 text-left rounded-xl border border-blue-200 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all group cursor-pointer"
               >
-                <div className="flex items-center gap-2 font-bold text-sm text-blue-700">
-                  <Briefcase className="w-4 h-4 text-blue-600" />
-                  <span>Sales (Kinh doanh)</span>
+                <div className="flex items-center justify-between font-bold text-sm text-blue-700">
+                  <span className="flex items-center gap-1.5">
+                    <UserCheck className="w-4 h-4 text-blue-600" />
+                    {t('login.sales_title')}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                    Sales Policy
+                  </span>
                 </div>
-                <p className="text-xs text-blue-600/80 mt-1">Quản lý pipeline đàm phán, KH phụ trách</p>
+                <p className="text-xs text-blue-700/80 mt-1">
+                  {t('login.sales_desc')}
+                </p>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleDemoClick('cs')}
-                className="p-3 text-left rounded-xl border border-emerald-100 bg-emerald-50/50 hover:bg-emerald-50 hover:border-emerald-300 transition-all group"
+                className="p-3 text-left rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 hover:border-emerald-300 transition-all group cursor-pointer"
               >
-                <div className="flex items-center gap-2 font-bold text-sm text-emerald-700">
-                  <Headphones className="w-4 h-4 text-emerald-600" />
-                  <span>CS (Chăm sóc & Thu nợ)</span>
+                <div className="flex items-center justify-between font-bold text-sm text-emerald-700">
+                  <span className="flex items-center gap-1.5">
+                    <UserCheck className="w-4 h-4 text-emerald-600" />
+                    {t('login.cs_title')}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    CS & Debt Policy
+                  </span>
                 </div>
-                <p className="text-xs text-emerald-600/80 mt-1">Theo dõi KH rủi ro, ghi nhận hóa đơn & thu tiền</p>
+                <p className="text-xs text-emerald-700/80 mt-1">
+                  {t('login.cs_desc')}
+                </p>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleDemoClick('marketing')}
-                className="p-3 text-left rounded-xl border border-purple-100 bg-purple-50/50 hover:bg-purple-50 hover:border-purple-300 transition-all group"
+                className="p-3 text-left rounded-xl border border-purple-200 bg-purple-50/50 hover:bg-purple-50 hover:border-purple-300 transition-all group cursor-pointer"
               >
-                <div className="flex items-center gap-2 font-bold text-sm text-purple-700">
-                  <Megaphone className="w-4 h-4 text-purple-600" />
-                  <span>Marketing (Tiếp thị)</span>
+                <div className="flex items-center justify-between font-bold text-sm text-purple-700">
+                  <span className="flex items-center gap-1.5">
+                    <UserCheck className="w-4 h-4 text-purple-600" />
+                    {t('login.mkt_title')}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
+                    Marketing Policy
+                  </span>
                 </div>
-                <p className="text-xs text-purple-600/80 mt-1">Tạo Lead mới, xem tổng quan & báo cáo</p>
+                <p className="text-xs text-purple-700/80 mt-1">
+                  {t('login.mkt_desc')}
+                </p>
               </button>
             </div>
           </div>
@@ -120,14 +156,14 @@ export const LoginPage: React.FC = () => {
               <div className="w-full border-t border-slate-200" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-3 text-slate-400 font-medium">Hoặc đăng nhập với tài khoản</span>
+              <span className="bg-white px-3 text-slate-400 font-medium">{t('login.or_account')}</span>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                Email
+                {t('login.email')}
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
@@ -144,7 +180,7 @@ export const LoginPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                Mật khẩu
+                {t('login.password')}
               </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
@@ -164,7 +200,7 @@ export const LoginPage: React.FC = () => {
               disabled={loading}
               className="w-full mt-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
             >
-              <span>{loading ? 'Đang xác thực...' : 'Đăng nhập vào hệ thống'}</span>
+              <span>{loading ? t('login.submitting') : t('login.submit')}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

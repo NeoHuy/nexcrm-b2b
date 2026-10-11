@@ -89,45 +89,113 @@ class Customer < ApplicationRecord
   end
 
   def debt_badge
+    locale = I18n.locale
     case debt_status
     when :overdue
-      { label: "Quá hạn #{days_overdue} ngày", class: "bg-red-100 text-red-800 border-red-200" }
+      lbl = case locale
+            when :en then "Overdue #{days_overdue} days"
+            when :ja then "#{days_overdue}日超過"
+            else "Quá hạn #{days_overdue} ngày"
+            end
+      { label: lbl, class: "bg-red-100 text-red-800 border-red-200" }
     when :due_soon
-      { label: "Sắp đến hạn", class: "bg-amber-100 text-amber-800 border-amber-200" }
+      lbl = case locale
+            when :en then "Due Soon"
+            when :ja then "期日間近"
+            else "Sắp đến hạn"
+            end
+      { label: lbl, class: "bg-amber-100 text-amber-800 border-amber-200" }
     when :in_term
-      { label: "Trong hạn", class: "bg-blue-100 text-blue-800 border-blue-200" }
+      lbl = case locale
+            when :en then "Within Term"
+            when :ja then "期日内"
+            else "Trong hạn"
+            end
+      { label: lbl, class: "bg-blue-100 text-blue-800 border-blue-200" }
     when :settled
-      { label: "Đã tất toán", class: "bg-slate-100 text-slate-600 border-slate-200" }
+      lbl = case locale
+            when :en then "Settled"
+            when :ja then "精算済"
+            else "Đã tất toán"
+            end
+      { label: lbl, class: "bg-slate-100 text-slate-600 border-slate-200" }
     end
   end
 
   def status_badge
+    locale = I18n.locale
     case status
     when "lead"
-      { label: "Tiềm năng", class: "bg-sky-100 text-sky-800 border-sky-200" }
+      lbl = case locale
+            when :en then "Lead"
+            when :ja then "見込み客（リード）"
+            else "Tiềm năng"
+            end
+      { label: lbl, class: "bg-sky-100 text-sky-800 border-sky-200" }
     when "prospect"
-      { label: "Đang đàm phán", class: "bg-indigo-100 text-indigo-800 border-indigo-200" }
+      lbl = case locale
+            when :en then "In Negotiation"
+            when :ja then "商談中"
+            else "Đang đàm phán"
+            end
+      { label: lbl, class: "bg-indigo-100 text-indigo-800 border-indigo-200" }
     when "active"
-      { label: "Đang hợp tác", class: "bg-emerald-100 text-emerald-800 border-emerald-200" }
+      lbl = case locale
+            when :en then "Active Partner"
+            when :ja then "取引中（契約中）"
+            else "Đang hợp tác"
+            end
+      { label: lbl, class: "bg-emerald-100 text-emerald-800 border-emerald-200" }
     when "at_risk"
-      { label: "Cảnh báo rủi ro", class: "bg-orange-100 text-orange-800 border-orange-200" }
+      lbl = case locale
+            when :en then "At Risk"
+            when :ja then "要注意（リスク）"
+            else "Cảnh báo rủi ro"
+            end
+      { label: lbl, class: "bg-orange-100 text-orange-800 border-orange-200" }
     when "inactive"
-      { label: "Ngưng hợp tác", class: "bg-gray-100 text-gray-700 border-gray-200" }
+      lbl = case locale
+            when :en then "Inactive"
+            when :ja then "取引停止"
+            else "Ngưng hợp tác"
+            end
+      { label: lbl, class: "bg-gray-100 text-gray-700 border-gray-200" }
     else
       { label: status.to_s.humanize, class: "bg-gray-100 text-gray-700 border-gray-200" }
     end
   end
 
   def tier_badge
+    locale = I18n.locale
     case tier
     when "vip"
-      { label: "VIP Doanh nghiệp", class: "bg-purple-100 text-purple-800 border-purple-200 font-semibold" }
+      lbl = case locale
+            when :en then "Enterprise VIP"
+            when :ja then "VIPエンタープライズ"
+            else "VIP Doanh nghiệp"
+            end
+      { label: lbl, class: "bg-purple-100 text-purple-800 border-purple-200 font-semibold" }
     when "gold"
-      { label: "Vàng (Gold)", class: "bg-yellow-100 text-yellow-800 border-yellow-200 font-semibold" }
+      lbl = case locale
+            when :en then "Gold"
+            when :ja then "ゴールド"
+            else "Vàng (Gold)"
+            end
+      { label: lbl, class: "bg-yellow-100 text-yellow-800 border-yellow-200 font-semibold" }
     when "silver"
-      { label: "Bạc (Silver)", class: "bg-slate-200 text-slate-800 border-slate-300" }
+      lbl = case locale
+            when :en then "Silver"
+            when :ja then "シルバー"
+            else "Bạc (Silver)"
+            end
+      { label: lbl, class: "bg-slate-200 text-slate-800 border-slate-300" }
     else
-      { label: "Tiêu chuẩn", class: "bg-gray-100 text-gray-600 border-gray-200" }
+      lbl = case locale
+            when :en then "Standard"
+            when :ja then "スタンダード"
+            else "Tiêu chuẩn"
+            end
+      { label: lbl, class: "bg-gray-100 text-gray-600 border-gray-200" }
     end
   end
 

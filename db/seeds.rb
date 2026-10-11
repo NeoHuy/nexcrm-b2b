@@ -6,7 +6,7 @@ DebtTransaction.destroy_all
 Customer.destroy_all
 User.destroy_all
 
-# 2. Seed Users with BCrypt passwords
+# 2. Seed Users with BCrypt passwords (2 Roles: admin & user + Policies)
 admin_user = User.create!(
   name: "Quản trị viên Hệ thống",
   email: "admin@crm.saas",
@@ -15,6 +15,8 @@ admin_user = User.create!(
   title: "Giám đốc Vận hành & Quản trị (Admin)",
   phone: "0901 000 999",
   department: "management",
+  policy_code: "admin_all",
+  policy_permissions: User::ADMIN_PERMISSIONS,
   avatar_color: "rose"
 )
 
@@ -26,6 +28,8 @@ sales_user = User.create!(
   title: "Trưởng nhóm Kinh doanh B2B (Senior AE)",
   phone: "0908 112 233",
   department: "sales",
+  policy_code: "sales_policy",
+  policy_permissions: User::POLICY_PRESETS.dig("sales_policy", :permissions),
   avatar_color: "blue"
 )
 
@@ -37,6 +41,8 @@ cs_user = User.create!(
   title: "Trưởng phòng Chăm sóc Khách hàng (CS Lead)",
   phone: "0912 445 566",
   department: "cs",
+  policy_code: "cs_debt_policy",
+  policy_permissions: User::POLICY_PRESETS.dig("cs_debt_policy", :permissions),
   avatar_color: "emerald"
 )
 
@@ -48,10 +54,12 @@ mkt_user = User.create!(
   title: "Giám đốc Tăng trưởng (Growth Marketing)",
   phone: "0934 778 899",
   department: "marketing",
+  policy_code: "marketing_policy",
+  policy_permissions: User::POLICY_PRESETS.dig("marketing_policy", :permissions),
   avatar_color: "purple"
 )
 
-puts "✓ Đã tạo 4 tài khoản (1 Admin và 3 User: Sales, CS, Marketing)"
+puts "✓ Đã tạo 4 tài khoản (2 Roles: 1 Admin và 3 User gắn Policy khác nhau)"
 
 # 3. Seed B2B Customers
 customers_data = [

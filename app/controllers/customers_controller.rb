@@ -2,7 +2,7 @@ class CustomersController < ApplicationController
   before_action :set_customer, only: [:show, :edit, :update, :destroy]
 
   def index
-    authorize Customer
+    authorize Customer, :index?
 
     @query = params[:q]
     @status = params[:status]
@@ -10,7 +10,8 @@ class CustomersController < ApplicationController
     @debt_filter = params[:debt_filter]
     @assigned_to = params[:assigned_to]
 
-    customers = Customer.includes(:assigned_user)
+    base_customers = policy_scope(Customer)
+    customers = base_customers.includes(:assigned_user)
     customers = customers.search(@query) if @query.present?
     customers = customers.by_status(@status) if @status.present?
     customers = customers.by_industry(@industry) if @industry.present?
@@ -30,10 +31,10 @@ class CustomersController < ApplicationController
     @customers = customers.order(created_at: :desc)
 
     # Statistics for filters bar
-    @total_count = Customer.count
-    @overdue_count = Customer.overdue_debts.count
-    @has_debt_count = Customer.with_debt.count
-    @total_debt_amount = Customer.sum(:current_debt)
+    @total_count = base_customers.count
+    @overdue_count = base_customers.overdue_debts.count
+    @has_debt_count = base_customers.with_debt.count
+    @total_debt_amount = base_customers.sum(:current_debt)
   end
 
   def show

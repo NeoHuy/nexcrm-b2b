@@ -1,5 +1,18 @@
 import axios from 'axios';
-import type { Customer, DashboardData, CustomerMeta, DemoUser, User, ManagedUser, UserStats, Activity, DebtTransaction } from '../types';
+import type {
+  Customer,
+  DashboardData,
+  CustomerMeta,
+  DemoUser,
+  User,
+  ManagedUser,
+  UserStats,
+  Activity,
+  DebtTransaction,
+  PolicyCode,
+  PolicyPermissions,
+} from '../types';
+import { getStoredLanguage } from '../context/LanguageContext';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -8,6 +21,13 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+});
+
+api.interceptors.request.use((config) => {
+  const lang = getStoredLanguage();
+  config.headers['X-Locale'] = lang;
+  config.headers['Accept-Language'] = lang;
+  return config;
 });
 
 export const authApi = {
@@ -19,8 +39,9 @@ export const authApi = {
     const res = await api.post('/login', { email, password });
     return res.data;
   },
-  demoLogin: async (role: string): Promise<{ message: string; user: User }> => {
-    const res = await api.post('/demo_login', { role });
+  demoLogin: async (roleOrPayload: string | { user_id?: number; role?: string }): Promise<{ message: string; user: User }> => {
+    const payload = typeof roleOrPayload === 'string' ? { role: roleOrPayload } : roleOrPayload;
+    const res = await api.post('/demo_login', payload);
     return res.data;
   },
   getDemoUsers: async (): Promise<DemoUser[]> => {
@@ -72,7 +93,9 @@ export const customersApi = {
     permissions: {
       can_update: boolean;
       can_destroy: boolean;
+      can_view_debt?: boolean;
       can_create_activity: boolean;
+      can_delete_activity?: boolean;
       can_create_debt_transaction: boolean;
     };
   }> => {
@@ -143,6 +166,7 @@ export const usersApi = {
     q?: string;
     role?: string;
     department?: string;
+    policy_code?: string;
   }): Promise<{
     users: ManagedUser[];
     stats: UserStats;
@@ -156,7 +180,9 @@ export const usersApi = {
     email: string;
     password?: string;
     role: 'admin' | 'user';
-    department: 'sales' | 'cs' | 'marketing' | 'management';
+    department?: 'sales' | 'cs' | 'marketing' | 'management';
+    policy_code?: PolicyCode;
+    policy_permissions?: Partial<PolicyPermissions>;
     title?: string;
     phone?: string;
   }): Promise<{ message: string; user: ManagedUser }> => {
@@ -172,6 +198,8 @@ export const usersApi = {
       password?: string;
       role?: 'admin' | 'user';
       department?: 'sales' | 'cs' | 'marketing' | 'management';
+      policy_code?: PolicyCode;
+      policy_permissions?: Partial<PolicyPermissions>;
       title?: string;
       phone?: string;
     }
@@ -182,7 +210,13 @@ export const usersApi = {
 
   updateRole: async (
     id: number,
-    payload: { preset?: 'admin' | 'sales' | 'cs' | 'marketing'; role?: string; department?: string }
+    payload: {
+      role?: 'admin' | 'user';
+      policy_code?: PolicyCode;
+      policy_permissions?: Partial<PolicyPermissions>;
+      preset?: string;
+      department?: string;
+    }
   ): Promise<{ message: string; user: ManagedUser }> => {
     const res = await api.patch(`/users/${id}/update_role`, payload);
     return res.data;

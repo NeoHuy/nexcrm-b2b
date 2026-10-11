@@ -12,11 +12,15 @@ module Api
         if transaction.save
           customer.reload
           render json: {
-            message: "Giao dịch công nợ đã được ghi nhận thành công!",
+            message: localized_msg(
+              vi: "Giao dịch công nợ đã được ghi nhận thành công!",
+              en: "Receivables transaction recorded successfully!",
+              ja: "売掛金取引を正常に記録しました！"
+            ),
             transaction: {
               id: transaction.id,
               transaction_type: transaction.transaction_type,
-              transaction_type_label: DebtTransaction::TRANSACTION_TYPES[transaction.transaction_type],
+              transaction_type_label: transaction.localized_type_label,
               amount: transaction.amount.to_f,
               transaction_date: transaction.transaction_date,
               reference_code: transaction.reference_code,
