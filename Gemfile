@@ -6,6 +6,7 @@ gem "pg", "~> 1.1"
 gem "puma", ">= 6.0"
 gem "propshaft"
 gem "bcrypt", "~> 3.1.7"
+gem "rack-cors"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ]

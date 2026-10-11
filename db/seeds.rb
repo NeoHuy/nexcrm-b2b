@@ -293,7 +293,7 @@ sg.activities.create!(
 med = Customer.find_by(company_name: "Công ty CP Dược Phẩm MediCare Hà Nội")
 med.activities.create!(
   user: sales_user,
-  activity_type: "demo",
+  activity_type: "meeting",
   title: "Demo trực tiếp hệ thống quản lý dữ liệu bệnh viện",
   content: "Buổi demo trực tuyến qua Zoom với 4 trưởng khoa của MediCare. Phản hồi rất tích cực về tính năng bảo mật.",
   occurred_at: 3.days.ago,

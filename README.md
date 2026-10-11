@@ -12,7 +12,12 @@ Chỉ cần chạy 1 câu lệnh duy nhất:
 ```bash
 docker compose up --build
 ```
-> Hệ thống sẽ tự động khởi động service PostgreSQL 16, build image Rails 8, tự động migrate database, nạp sẵn dữ liệu mẫu B2B (seeds) và mount volume `pg_data` lưu trữ dữ liệu bền vững.
+> Hệ thống sẽ tự động khởi động đồng bộ 3 service:
+> 1. 🗄️ **PostgreSQL 16** (`db`, port 5432)
+> 2. ⚙️ **Rails 8 Backend API** (`crm-web`, port 3000)
+> 3. ⚛️ **React 19 Vite Frontend** (`frontend`, port 5173 - Nginx Alpine reverse-proxy `/api` về `crm-web`)
+>
+> 🌐 Truy cập ngay giao diện React tại: **`http://localhost:5173`** (hoặc Rails API tại `http://localhost:3000`)
 
 ---
 
@@ -29,11 +34,18 @@ bundle install
 bin/rails db:prepare
 bin/rails db:seed
 
-# 2. Khởi động server CRM
+# 2. Khởi động server Rails API Backend
 bin/rails server
 ```
+Rails backend chạy tại: **`http://localhost:3000`**
 
-Mở trình duyệt truy cập: **`http://localhost:3000`**
+### Chạy Giao diện Frontend (React Vite):
+Mở một terminal mới:
+```bash
+cd frontend
+npm run dev
+```
+Truy cập giao diện React hiện đại tại: **`http://localhost:5173`** (đã được cấu hình tự động proxy API sang port 3000).
 
 ---
 

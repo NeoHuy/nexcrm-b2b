@@ -1,3 +1,3 @@
-require_relative "config/boot"
-require "rake"
-Rake.application.run
+require_relative "config/application"
+
+Rails.application.load_tasks

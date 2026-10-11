@@ -11,3 +11,4 @@ storage/*
 node_modules
 .DS_Store
 *.md
+frontend/

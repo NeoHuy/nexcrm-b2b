@@ -46,6 +46,26 @@ class User < ApplicationRecord
     end
   end
 
+  def department_label
+    case department
+    when "management"
+      "Ban Quản trị / Giám đốc"
+    when "sales"
+      "Phòng Kinh doanh (Sales)"
+    when "cs"
+      "Phòng CS & Quản lý Công nợ"
+    when "marketing"
+      "Phòng Tiếp thị (Marketing)"
+    else
+      "Chưa phân phòng ban"
+    end
+  end
+
+  def role_preset
+    return "admin" if admin?
+    department.presence || "sales"
+  end
+
   def role_badge_class
     if admin?
       "bg-rose-100 text-rose-800 border-rose-200 font-bold"
