@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { 
   Building2, 
@@ -19,6 +20,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSelectCustomer }) => {
   const { currentUser, demoLogin, logout } = useAuth();
+  const { t, translateRole, translateDepartment } = useLanguage();
 
   const handleNav = (tab: 'dashboard' | 'customers' | 'debts' | 'users') => {
     if (onSelectCustomer) onSelectCustomer(null);
@@ -39,12 +41,12 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
       {/* Top Demo Bar */}
-      <div className="bg-slate-900 text-slate-300 text-xs px-4 py-1.5 flex flex-wrap items-center justify-between border-b border-slate-800">
+      <div className="bg-slate-900 text-slate-300 text-xs px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 border-b border-slate-800">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-amber-400 flex items-center gap-1">
-            ⚡ Chuyển đổi nhanh (2 Roles: Admin & User):
+            {t('nav.demo_bar_title')}
           </span>
-          <span className="text-slate-400 hidden sm:inline">Kiểm thử phân quyền Policy trực tiếp:</span>
+          <span className="text-slate-400 hidden sm:inline">{t('nav.demo_bar_subtitle')}</span>
         </div>
         <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
           <button
@@ -55,37 +57,37 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
-            <ShieldCheck className="w-3 h-3" /> Role: Admin (Toàn quyền)
+            <ShieldCheck className="w-3 h-3" /> {t('nav.role_admin_short')}
           </button>
           <button
             onClick={() => demoLogin('sales')}
             className={`px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
-              currentUser?.role === 'user' && currentUser?.policy_code === 'sales_policy'
+              currentUser?.role === 'user' && (currentUser?.policy_code === 'sales_policy' || currentUser?.department === 'sales')
                 ? 'bg-blue-600 text-white font-bold ring-2 ring-blue-300'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
-            <UserCheck className="w-3 h-3" /> User (Policy Kinh doanh)
+            <UserCheck className="w-3 h-3" /> {t('nav.role_sales_short')}
           </button>
           <button
             onClick={() => demoLogin('cs')}
             className={`px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
-              currentUser?.role === 'user' && currentUser?.policy_code === 'cs_debt_policy'
+              currentUser?.role === 'user' && (currentUser?.policy_code === 'cs_debt_policy' || currentUser?.department === 'cs')
                 ? 'bg-emerald-600 text-white font-bold ring-2 ring-emerald-300'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
-            <UserCheck className="w-3 h-3" /> User (Policy Công nợ & CS)
+            <UserCheck className="w-3 h-3" /> {t('nav.role_cs_short')}
           </button>
           <button
             onClick={() => demoLogin('marketing')}
             className={`px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
-              currentUser?.role === 'user' && currentUser?.policy_code === 'marketing_policy'
+              currentUser?.role === 'user' && (currentUser?.policy_code === 'marketing_policy' || currentUser?.department === 'marketing')
                 ? 'bg-purple-600 text-white font-bold ring-2 ring-purple-300'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
-            <UserCheck className="w-3 h-3" /> User (Policy Tiếp thị)
+            <UserCheck className="w-3 h-3" /> {t('nav.role_mkt_short')}
           </button>
         </div>
       </div>
@@ -105,7 +107,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
                 <span className="font-bold text-lg text-slate-900 tracking-tight flex items-center gap-1.5">
                   NexCRM <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-semibold uppercase">B2B SaaS</span>
                 </span>
-                <p className="text-[10px] text-slate-400 font-medium -mt-1 leading-none">Quản lý Khách hàng & Công nợ</p>
+                <p className="text-[10px] text-slate-400 font-medium -mt-1 leading-none">{t('app.subtitle')}</p>
               </div>
             </div>
 
@@ -120,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
                   }`}
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  Tổng quan
+                  {t('nav.dashboard')}
                 </button>
 
                 {canViewCustomer && (
@@ -133,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
                     }`}
                   >
                     <Users className="w-4 h-4" />
-                    Khách hàng B2B
+                    {t('nav.customers')}
                   </button>
                 )}
 
@@ -147,7 +149,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
                     }`}
                   >
                     <Receipt className="w-4 h-4" />
-                    Sổ Công nợ
+                    {t('nav.debts')}
                   </button>
                 )}
 
@@ -161,7 +163,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
                     }`}
                   >
                     <ShieldCheck className="w-4 h-4" />
-                    <span>Nhân sự & Policy</span>
+                    <span>{t('nav.users')}</span>
                     <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-600 text-white uppercase">
                       Admin
                     </span>
@@ -170,13 +172,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
               </nav>
             ) : (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-                <span>🔒 Tài khoản User chưa được cấp quyền Policy (0 quyền truy xuất)</span>
+                <span>🔒 No Policy Access</span>
               </div>
             )}
           </div>
 
           <div className="flex items-center gap-3">
-            <LanguageSwitcher />
+            <LanguageSwitcher variant="light" />
             {currentUser && (
               <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
                 <div className="text-right hidden md:block">
@@ -189,7 +191,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
                           : 'bg-indigo-100 text-indigo-700'
                       }`}
                     >
-                      {currentUser.role_label}
+                      {translateRole(currentUser.role, currentUser.department, currentUser.role_label)}
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 flex items-center justify-end gap-1">
@@ -198,13 +200,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onSel
                     ) : (
                       <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
                     )}
-                    <span>{currentUser.policy_label || currentUser.role_label}</span>
+                    <span>{translateDepartment(currentUser.department, currentUser.policy_label || currentUser.department_label || currentUser.role_label)}</span>
                   </div>
                 </div>
                 <button
                   onClick={logout}
-                  title="Đăng xuất"
-                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                  title={t('nav.logout')}
+                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
